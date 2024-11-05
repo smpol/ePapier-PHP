@@ -9,6 +9,7 @@ services:
       - "443:443/udp"
     environment:
       - COMPOSER_ALLOW_SUPERUSER=1
+    restart: always
   developent-server:
     image: shinsenter/symfony:latest
     volumes:
