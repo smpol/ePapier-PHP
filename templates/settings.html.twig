@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Control Panel</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+    <style>
+        /* Stylizacja przycisków bez użycia ikon Bootstrap */
+        .btn-icon {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            font-size: 18px;
+            line-height: 1;
+        }
+    </style>
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function showPosition(position) {
+            document.getElementById("latitude").value = position.coords.latitude;
+            document.getElementById("longitude").value = position.coords.longitude;
+        }
+
+        function showError(error) {
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("User denied the request for Geolocation.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable.");
+                    break;
+                case error.TIMEOUT:
+                    alert("The request to get user location timed out.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert("An unknown error occurred.");
+                    break;
+            }
+        }
+
+        function showContent(section) {
+            const sections = document.querySelectorAll(".content-section");
+            sections.forEach((sec) => (sec.style.display = "none"));
+            document.getElementById(section).style.display = "block";
+
+            const links = document.querySelectorAll(".list-group-item");
+            links.forEach((link) => link.classList.remove("active"));
+            document.querySelector(`[onclick="showContent('${section}')"]`).classList.add("active");
+
+            // Aktualizuj URL z parametrem "tab"
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set("tab", section);
+            window.history.replaceState(null, "", newUrl);
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const section = urlParams.get("tab") || "location-settings";
+            showContent(section); // Domyślnie pokaż ustawienia lokalizacji
+        });
+    </script>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a
+                        href="#"
+                        class="list-group-item list-group-item-action"
+                        onclick="showContent('location-settings')"
+                >
+                    Location Settings
+                </a>
+                <a
+                        href="#"
+                        class="list-group-item list-group-item-action"
+                        onclick="showContent('solar-settings')"
+                >
+                    SolarEdge
+                </a>
+                <a
+                        href="#"
+                        class="list-group-item list-group-item-action"
+                        onclick="showContent('email-settings')"
+                >
+                    Email Settings
+                </a>
+                <a
+                        href="#"
+                        class="list-group-item list-group-item-action"
+                        onclick="showContent('google-settings')"
+                >
+                    Google Calendar Settings
+                </a>
+                <a
+                        href="#"
+                        class="list-group-item list-group-item-action"
+                        onclick="showContent('spotify-settings')"
+                >
+                    Spotify Settings
+                </a>
+                <a
+                        href="#"
+                        class="list-group-item list-group-item-action"
+                        onclick="showContent('layout-settings')"
+                >
+                    Layout Settings
+                </a>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div id="location-settings" class="content-section">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3>Set Your Location</h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="/set-location">
+                            <div class="mb-3">
+                                <label for="city" class="form-label">City (optional)</label>
+                                <input
+                                        type="text"
+                                        class="form-control"
+                                        id="city"
+                                        name="city"
+                                        placeholder="Enter city name"
+                                        list="city-list"
+                                />
+                                <datalist id="city-list">
+                                    <!-- Dynamicznie wygenerowane opcje miast -->
+                                </datalist>
+                                <div class="form-text">
+                                    Enter the city name or use GPS for auto-detection.
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="latitude" class="form-label">Latitude</label>
+                                <input
+                                        type="text"
+                                        class="form-control"
+                                        id="latitude"
+                                        name="latitude"
+                                        placeholder="Auto-filled by GPS or Selected City"
+                                        value="{% if location %} {{ location.lat }} {% endif %}"
+                                        readonly
+                                />
+                            </div>
+                            <div class="mb-3">
+                                <label for="longitude" class="form-label">Longitude</label>
+                                <input
+                                        type="text"
+                                        class="form-control"
+                                        id="longitude"
+                                        name="longitude"
+                                        placeholder="Auto-filled by GPS or Selected City"
+                                        value="{% if location %} {{ location.leng }} {% endif %}"
+                                        readonly
+                                />
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button
+                                        type="button"
+                                        onclick="getLocation()"
+                                        class="btn btn-primary"
+                                >
+                                    <i class="fas fa-map-marker-alt"></i> Use GPS Location
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i> Save Location
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-muted text-center">
+                        <small>
+                            Your location data will be stored securely and used to fetch
+                            the weather forecast.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div id="google-settings" class="content-section" style="display: none">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3>Google Calendar Settings</h3>
+                    </div>
+                    <div class="card-body text-center">
+                        {% if not googleSettings %}
+                            <a href="{{ path('google-login') }}" class="btn btn-success">
+                                Connect to Google Calendar
+                            </a>
+                        {% else %}
+                            <a href="{{ path('google-remove-calendar') }}" class="btn btn-danger">
+                                Disconnect from Google Calendar
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div id="email-settings" class="content-section" style="display: none">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3>Email Account Settings</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if not emailSettings %}
+                            <form method="POST" action="/email-settings">
+                                <h5>IMAP Settings</h5>
+                                <div class="mb-3">
+                                    <label for="imap_server" class="form-label">IMAP Server</label>
+                                    <input
+                                            type="text"
+                                            class="form-control"
+                                            id="imap_server"
+                                            name="imap_server"
+                                            required
+                                            placeholder="e.g., imap.gmail.com"
+                                    />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="imap_port" class="form-label">IMAP Port</label>
+                                    <input
+                                            type="number"
+                                            class="form-control"
+                                            id="imap_port"
+                                            name="imap_port"
+                                            required
+                                            placeholder="e.g., 993"
+                                    />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="imap_username" class="form-label">IMAP Username</label>
+                                    <input
+                                            type="text"
+                                            class="form-control"
+                                            id="imap_username"
+                                            name="imap_username"
+                                            required
+                                            placeholder="Your IMAP username"
+                                    />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="imap_password" class="form-label">IMAP Password</label>
+                                    <input
+                                            type="password"
+                                            class="form-control"
+                                            id="imap_password"
+                                            name="imap_password"
+                                            required
+                                            placeholder="Your IMAP password"
+                                    />
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save"></i> Save Email Settings
+                                    </button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <form action="{{ path('delete-email') }}" method="post"
+                                  style="margin-top: 15px">
+                                <button type="submit" class="btn btn-danger">
+                                    Remove Email Account
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer text-muted text-center">
+                        <small>Your email settings will be used to fetch unread messages and display recent
+                            emails.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div id="solar-settings" class="content-section" style="display: none">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3>SolarEdge API Key Settings</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if not solarEdgeSettings %}
+                            <form method="POST" action="/solar-edge">
+                                <div class="mb-3">
+                                    <label for="api_key" class="form-label">SolarEdge API Key</label>
+                                    <input
+                                            type="password"
+                                            class="form-control"
+                                            id="api_key"
+                                            name="api_key"
+                                            required
+                                            placeholder="Enter your SolarEdge API key"
+                                    />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="site_id" class="form-label">Site ID</label>
+                                    <input
+                                            type="text"
+                                            class="form-control"
+                                            id="site_id"
+                                            name="site_id"
+                                            required
+                                            placeholder="Enter your SolarEdge site ID"
+                                    />
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save"></i> Save API Key
+                                    </button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <form method="POST" action="{{ path('delete-solar-edge') }}">
+                                <button type="submit" class="btn btn-danger">
+                                    Remove SolarEdge API Key
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div id="spotify-settings" class="content-section" style="display: none">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3>Spotify Settings</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if not spotifySettings %}
+                            <form action="{{ path('spotify-login') }}">
+                                <button type="submit" class="btn btn-success">
+                                    Connect to Spotify
+                                </button>
+                            </form>
+                        {% else %}
+                            <form action="{{ path('spotify-logout') }}">
+                                <button type="submit" class="btn btn-danger">
+                                    Disconnect from Spotify
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div id="layout-settings" class="content-section" style="display: none">
+                <form method="POST" action="{{ path('set-layout') }}">
+                    <div class="card shadow-lg mb-4">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h3>Set Component Order</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Choose the order of the components you want to display on the dashboard:</p>
+
+                            <div id="components-container">
+                                {% for i in 0..5 %}
+                                    <div class="mb-3 component-select" data-index="{{ i }}">
+                                        <label for="component{{ i + 1 }}"
+                                               class="form-label">Component {{ i + 1 }}</label>
+                                        <div class="input-group">
+                                            <select class="form-select component-select-input" id="component{{ i + 1 }}"
+                                                    name="component{{ i + 1 }}" required>
+                                                <option value="">Select component</option>
+                                                {% for key, name in availableComponents %}
+                                                    <option value="{{ key }}" {{ selectedComponents[i] == key ? 'selected' : '' }}>
+                                                        {{ name }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="button" class="btn btn-outline-secondary remove-component"
+                                                    title="Remove selection">
+                                                &minus; <!-- Unicode znak minus -->
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <button type="button" id="add-component" class="btn btn-outline-primary mt-3">
+                                &#43; Reset All Compoments <!-- Unicode znak plus -->
+                            </button>
+
+                            <div id="validation-message" class="text-danger mt-3" style="display: none;">
+                                All fields must have a selected value and cannot be repeated.
+                            </div>
+                        </div>
+                        <div class="card-footer text-center">
+                            <button type="submit" class="btn btn-success">Save Component Order</button>
+                        </div>
+                    </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const componentsContainer = document.getElementById('components-container');
+                            const addComponentBtn = document.getElementById('add-component');
+                            const validationMessage = document.getElementById('validation-message');
+
+                            // Funkcja do aktualizacji dostępnych opcji w selectach
+                            function updateSelectOptions() {
+                                const selects = document.querySelectorAll('.component-select-input');
+                                const selectedValues = Array.from(selects).map(select => select.value).filter(val => val !== '');
+
+                                selects.forEach(select => {
+                                    const currentValue = select.value;
+                                    // Włącz wszystkie opcje
+                                    Array.from(select.options).forEach(option => {
+                                        option.disabled = false;
+                                    });
+                                    // Wyłącz opcje już wybrane w innych selectach
+                                    selectedValues.forEach(value => {
+                                        if (value !== currentValue) {
+                                            const optionToDisable = select.querySelector(`option[value="${value}"]`);
+                                            if (optionToDisable) {
+                                                optionToDisable.disabled = true;
+                                            }
+                                        }
+                                    });
+                                });
+                            }
+
+                            // Funkcja do walidacji unikalności wyborów i pełności formularza
+                            function validateForm() {
+                                const selects = document.querySelectorAll('.component-select-input');
+                                const selectedValues = Array.from(selects).map(select => select.value);
+                                const allSelected = selectedValues.every(val => val !== '');
+                                const uniqueValues = new Set(selectedValues);
+                                const allUnique = uniqueValues.size === selectedValues.length;
+
+                                if (!allSelected || !allUnique) {
+                                    validationMessage.style.display = 'block';
+                                    return false;
+                                } else {
+                                    validationMessage.style.display = 'none';
+                                    return true;
+                                }
+                            }
+
+                            // Inicjalne wyłączenie opcji
+                            updateSelectOptions();
+
+                            // Obsługa zmiany wartości w selectach
+                            componentsContainer.addEventListener('change', function (e) {
+                                if (e.target && e.target.classList.contains('component-select-input')) {
+                                    updateSelectOptions();
+                                    validateForm();
+                                }
+                            });
+
+                            // Obsługa resetowania wszystkich wyborów
+                            addComponentBtn.addEventListener('click', function () {
+                                if (confirm('Czy chcesz zresetować wszystkie wybory komponentów?')) {
+                                    const selects = document.querySelectorAll('.component-select-input');
+                                    selects.forEach(select => {
+                                        select.value = '';
+                                    });
+                                    updateSelectOptions();
+                                    validateForm();
+                                }
+                            });
+
+                            // Obsługa usuwania wybranego komponentu
+                            componentsContainer.addEventListener('click', function (e) {
+                                if (e.target && e.target.closest('.remove-component')) {
+                                    const removeBtn = e.target.closest('.remove-component');
+                                    const select = removeBtn.closest('.component-select').querySelector('.component-select-input');
+                                    select.value = '';
+                                    updateSelectOptions();
+                                    validateForm();
+                                }
+                            });
+
+                            // Walidacja przy wysyłaniu formularza
+                            document.querySelector('form').addEventListener('submit', function (event) {
+                                if (!validateForm()) {
+                                    event.preventDefault(); // Zatrzymanie wysyłania formularza, jeśli walidacja nie przejdzie
+                                    alert('Upewnij się, że wszystkie pola są wypełnione i nie ma duplikatów.');
+                                }
+                            });
+                        });
+                    </script>
+                </form>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+<script>
+    let cities = [];
+
+    // Wczytaj dane z pliku JSON
+    fetch('/json/cities.json')
+        .then(response => response.json())
+        .then(data => {
+            cities = data;
+            populateCityList();
+        })
+        .catch(error => console.error('Błąd przy wczytywaniu danych:', error));
+
+    // Wypełnij datalist miastami
+    function populateCityList() {
+        const cityList = document.getElementById('city-list');
+        cities.forEach(city => {
+            const option = document.createElement('option');
+            option.value = city.name;
+            cityList.appendChild(option);
+        });
+    }
+
+    // Funkcja, która wypełni pola latitude i longitude na podstawie wybranego miasta
+    document.getElementById('city').addEventListener('input', function () {
+        const selectedCity = cities.find(city => city.name.toLowerCase() === this.value.toLowerCase());
+        if (selectedCity) {
+            document.getElementById('latitude').value = selectedCity.lat;
+            document.getElementById('longitude').value = selectedCity.lng;
+        }
+    });
+
+</script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

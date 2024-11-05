@@ -1,0 +1,26 @@
+<div class="col-md-4">
+    <div class="card">
+        <div class="card-body text-center">
+            <h5 class="card-title">Upcoming Events</h5>
+            <ul class="list-unstyled">
+                {% if events %}
+                    {% for event in events %}
+                        <li>
+                            <strong class="event-summary">{{ event.summary }}</strong><br/>
+                            <small>
+                                {{ event.start | date('d-m-Y H:i') }}
+                            </small>
+                            <br/>
+                            <small> {{ event.location or '' }} </small>
+                        </li>
+                        {% if not loop.last and loop.index0 < 2 %}
+                            <hr/>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p>No upcoming events.</p>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>

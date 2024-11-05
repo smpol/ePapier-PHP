@@ -1,0 +1,17 @@
+<div class="col-md-4">
+    <div class="card">
+        <div class="card-body text-center">
+            <h5 class="card-title">Current Time</h5>
+            <h1 class="card-text">{{ time }}</h1>
+            <h5 class="card-title">Current Temperature</h5>
+            {% if weather %}
+                <div class="d-flex justify-content-center align-items-center">
+                    <h3 class="card-text mb-0">{{ weather.current_weather.temperature }}°C</h3>
+                    <i class="wi weather-icon {{ weather.current_weather.icon}} ms-2"></i>
+                </div>
+            {% else %}
+                <p class="card-text">No weather data available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>

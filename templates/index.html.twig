@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Weather and Time</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/css/weather-icons.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        body,
+        html {
+            width: 800px;
+            height: 400px;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            height: 100%;
+            padding: 10px 2px;
+        }
+
+        .weather-icon {
+            font-size: 24px;
+            color: #000000;
+        }
+
+        .card-title,
+        .card-text,
+        h6,
+        p {
+            color: #000000;
+            margin-bottom: 5px;
+        }
+
+        .card {
+            border: 1px solid #000000;
+            margin-bottom: 5px;
+            height: 180px;
+            
+        }
+
+        .card-body {
+            padding: 10px;
+        }
+
+        .event-summary {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Pierwszy rząd -->
+    <div class="row">
+        {% for component in layout[:3] %}
+            {% if component == 'CurrentWeather' %}
+                {% include 'compoments/current_weather.html.twig' with {'time': time, 'weather': weather} %}
+            {% elseif component == 'Forecast' %}
+                {% include 'compoments/forecast_two_days.html.twig' with {'weather': weather} %}
+            {% elseif component == 'Spotify' %}
+                {% include 'compoments/spotify.html.twig' with {'spotifyNowPlaying': spotifyNowPlaying} %}
+            {% elseif component == 'GoogleCalendar' %}
+                {% include 'compoments/upcoming_events.html.twig' with {'events': events} %}
+            {% elseif component == 'Emails' %}
+                {% include 'compoments/emails_notification.html.twig' with {'emailConfigured': emailConfigured, 'latestMail': latestMail, 'unreadCount': unreadCount} %}
+            {% elseif component == 'SolarEdge' %}
+                {% include 'compoments/solar_edge_statistic.html.twig' with {'solarData': solarData} %}
+            {% elseif component == 'SolarEdgeChart' %}
+                {% include 'compoments/solar_edge_chart.html.twig' with {'weeklyProductionData': weeklyProductionData} %}
+            {% elseif component == 'AirQuality' %}
+                {% include 'compoments/air_quality.html.twig' with {'airQuality': airQuality} %}
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- Drugi rząd -->
+    <div class="row">
+        {% for component in layout[3:] %}
+            {% if component == 'CurrentWeather' %}
+                {% include 'compoments/current_weather.html.twig' with {'time': time, 'weather': weather} %}
+            {% elseif component == 'Forecast' %}
+                {% include 'compoments/forecast_two_days.html.twig' with {'weather': weather} %}
+            {% elseif component == 'Spotify' %}
+                {% include 'compoments/spotify.html.twig' with {'spotifyNowPlaying': spotifyNowPlaying} %}
+            {% elseif component == 'GoogleCalendar' %}
+                {% include 'compoments/upcoming_events.html.twig' with {'events': events} %}
+            {% elseif component == 'Emails' %}
+                {% include 'compoments/emails_notification.html.twig' with {'emailConfigured': emailConfigured, 'latestMail': latestMail, 'unreadCount': unreadCount} %}
+            {% elseif component == 'SolarEdge' %}
+                {% include 'compoments/solar_edge_statistic.html.twig' with {'solarData': solarData} %}
+            {% elseif component == 'SolarEdgeChart' %}
+                {% include 'compoments/solar_edge_chart.html.twig' with {'weeklyProductionData': weeklyProductionData} %}
+            {% elseif component == 'AirQuality' %}
+                {% include 'compoments/air_quality.html.twig' with {'airQuality': airQuality} %}
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

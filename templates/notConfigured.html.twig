@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather and Time</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/css/weather-icons.min.css" rel="stylesheet" />
+    <style>
+        body,
+        html {
+            width: 800px;
+            height: 400px;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .container {
+            height: 100%;
+            padding: 10px;
+        }
+        .weather-icon {
+            font-size: 24px;
+            color: #000000;
+        }
+        .card-title,
+        .card-text,
+        h6,
+        p {
+            color: #000000;
+            margin-bottom: 5px;
+        }
+        .card {
+            border: 1px solid #000000;
+            margin-bottom: 10px;
+        }
+        .card-body {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .row {
+            margin-bottom: 10px;
+        }
+        #qrcode {
+            margin-top: 10px;
+        }
+    </style>
+    <script src="/js/qrcode.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="card-body text-center">
+            <h5 class="card-title">Configuration</h5>
+            <p class="card-text">
+                Scan the QR code below to configure your location:
+            </p>
+            <div id="qrcode"></div>
+            <p class="card-text">
+                Or visit url:
+                <a href="/settings" style="color: black">{{ settings_url }}</a>
+            </p>
+        </div>
+    </div>
+</div>
+<script src="/js/qrcode.min.js"></script>
+<script>
+    var qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: "{{ settings_url }}",
+        width: 256,
+        height: 256,
+    });
+</script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

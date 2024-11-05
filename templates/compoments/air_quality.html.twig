@@ -1,0 +1,15 @@
+<div class="col-md-4">
+    <div class="card">
+        <div class="card-body text-center">
+            <h5 class="card-title">Air Quality</h5>
+            {% if airQuality %}
+                    <p class="card-text mb-0">European AQI - {{ airQuality.current.european_aqi }} {{airQuality.current_units.european_aqi}}</p>
+                    <p class="card-text mb-0">PM 10 - {{ airQuality.current.pm10 }} {{airQuality.current_units.pm10}}</p>
+                    <p class="card-text mb-0">PM 2.5 - {{ airQuality.current.pm2_5 }} {{airQuality.current_units.pm2_5}}</p>
+                    <p class="card-text mb-0">CO - {{ airQuality.current.carbon_monoxide}} {{ airQuality.current_units.carbon_monoxide}}</p>
+            {% else %}
+                <p class="card-text">No Air Quality data available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>

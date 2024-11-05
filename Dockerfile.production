@@ -1,0 +1,43 @@
+FROM dunglas/frankenphp
+
+# Skopiuj wszystkie pliki aplikacji
+COPY . /app
+
+# Usuń zbędne pliki, ustaw plik środowiska produkcyjnego
+RUN rm -rf .env .env.dev migrations vendor
+RUN mv .env.prod .env
+RUN mkdir -p var && chmod -R 775 var
+
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+# Instalacja rozszerzeń PHP oraz Composer
+RUN set -eux; \
+    install-php-extensions \
+        @composer \
+        intl \
+        zip \
+    ;
+
+RUN composer install --no-interaction --optimize-autoloader
+
+# Generowanie klucza szyfrowania
+RUN command=$(openssl rand -base64 32) && echo "ENCRYPTION_KEY=$command" >> .env
+
+# Migracja bazy danych
+RUN php bin/console doctrine:schema:update --force
+
+# Generowanie samopodpisanego certyfikatu SSL
+RUN mkdir -p /etc/caddy/certs && \
+    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+    -keyout /etc/caddy/certs/localhost.key \
+    -out /etc/caddy/certs/localhost.crt \
+    -subj "/CN=localhost"
+
+COPY Caddyfile /etc/caddy/Caddyfile
+
+ENV APP_ENV=prod
+
+# Wystaw porty dla Caddy (HTTP i HTTPS)
+EXPOSE 80 443 443/udp
+
+
