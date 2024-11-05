@@ -2,6 +2,8 @@
 
 Repozytorium odpowiedzialne za część projektu wykorzystującą język PHP w frameworku Symfony.
 
+![podgląd interfejsu](screen.png)
+
 > **Uwaga**: Projekt znajduje się w fazie rozwoju i nie stanowi wersji finalnej. W bieżącej wersji mogą występować błędy oraz niedociągnięcia logiczne, które będą poprawiane w przyszłych aktualizacjach.
 >
 > Dokumentacja również jest w trakcie tworzenia i może być uzupełniana wraz z postępem prac nad projektem.
