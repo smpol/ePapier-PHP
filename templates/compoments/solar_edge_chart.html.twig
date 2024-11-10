@@ -14,7 +14,7 @@
 <script src="/js/chart.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         // Assuming PHP data passed here as JSON
         const weeklyData = {{ weeklyProductionData|json_encode|raw }};
 
@@ -36,6 +36,12 @@
         };
 
         const options = {
+            animation: false,
+            animations: {
+                colors: false,
+                x: false,
+                y: false
+            },
             responsive: true,
             plugins: {
                 legend: {

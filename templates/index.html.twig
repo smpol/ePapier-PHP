@@ -11,6 +11,7 @@
         body {
             font-family: 'Roboto', sans-serif;
         }
+
         body,
         html {
             width: 800px;
@@ -42,7 +43,7 @@
             border: 1px solid #000000;
             margin-bottom: 5px;
             height: 180px;
-            
+
         }
 
         .card-body {
@@ -64,7 +65,7 @@
     <div class="row">
         {% for component in layout[:3] %}
             {% if component == 'CurrentWeather' %}
-                {% include 'compoments/current_weather.html.twig' with {'time': time, 'weather': weather} %}
+                {% include 'compoments/current_weather.html.twig' with {'weather': weather} %}
             {% elseif component == 'Forecast' %}
                 {% include 'compoments/forecast_two_days.html.twig' with {'weather': weather} %}
             {% elseif component == 'Spotify' %}
@@ -79,6 +80,8 @@
                 {% include 'compoments/solar_edge_chart.html.twig' with {'weeklyProductionData': weeklyProductionData} %}
             {% elseif component == 'AirQuality' %}
                 {% include 'compoments/air_quality.html.twig' with {'airQuality': airQuality} %}
+            {% elseif component == 'Countdown' %}
+                {% include 'compoments/countdown.html.twig' with {'countdown': countdown} %}
             {% endif %}
         {% endfor %}
     </div>
@@ -87,7 +90,7 @@
     <div class="row">
         {% for component in layout[3:] %}
             {% if component == 'CurrentWeather' %}
-                {% include 'compoments/current_weather.html.twig' with {'time': time, 'weather': weather} %}
+                {% include 'compoments/current_weather.html.twig' with {'weather': weather} %}
             {% elseif component == 'Forecast' %}
                 {% include 'compoments/forecast_two_days.html.twig' with {'weather': weather} %}
             {% elseif component == 'Spotify' %}
@@ -102,6 +105,8 @@
                 {% include 'compoments/solar_edge_chart.html.twig' with {'weeklyProductionData': weeklyProductionData} %}
             {% elseif component == 'AirQuality' %}
                 {% include 'compoments/air_quality.html.twig' with {'airQuality': airQuality} %}
+            {% elseif component == 'Countdown' %}
+                {% include 'compoments/countdown.html.twig' with {'countdown': countdown} %}
             {% endif %}
         {% endfor %}
     </div>

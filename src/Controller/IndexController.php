@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Countdown;
 use App\Entity\Location;
 use App\Service\OpenSSLEncryptionSerivce;
 use App\Service\SolarEdgeService;
@@ -34,29 +35,35 @@ class IndexController extends AbstractController
     {
         $layoutResponse = $layoutConfigController->getLayout();
         $layout = json_decode($layoutResponse->getContent(), true);
+        $countdown = $entityManager->getRepository(Countdown::class)->findBy([], ['date' => 'ASC']);
         $location = $entityManager->getRepository(Location::class)->find(1);
 
-        $weatherData = $cache->get('weather_data', function (ItemInterface $item) use ($weatherService, $location) {
+        $weatherData = $cache->get('weather_data', function (ItemInterface $item) use ($weatherService, $location, $cache) {
             if ($location) {
                 $item->expiresAfter(60);
                 return $weatherService->getWeatherData($location->getLat(), $location->getLeng());
-            } else
+            } else {
+                if (isset($cache)) $cache->delete('weather_data');
                 $item->expiresAfter(0);
+            }
             return null;
         });
 
-        $airQuality = $cache->get('air_quality', function (ItemInterface $item) use ($weatherService, $location) {
+        $airQuality = $cache->get('air_quality', function (ItemInterface $item) use ($weatherService, $location, $cache) {
             if ($location) {
                 $item->expiresAfter(60);
                 return $weatherService->getAirQuality($location->getLat(), $location->getLeng());
-            } else
+            } else {
+                if (isset($cache)) $cache->delete('air_quality');
                 $item->expiresAfter(0);
+            }
             return null;
         });
 
-        $solarEdgeData = $cache->get('solar_edge_data', function (ItemInterface $item) use ($solarEdgeService, $entityManager) {
+        $solarEdgeData = $cache->get('solar_edge_data', function (ItemInterface $item) use ($solarEdgeService, $entityManager, $cache) {
             $data = $solarEdgeService->getSolarEdgeData($entityManager);
             if (!$data) {
+                if (isset($cache)) $cache->delete('solar_edge_data');
                 $item->expiresAfter(0);
             } else {
                 $item->expiresAfter(60);
@@ -64,10 +71,10 @@ class IndexController extends AbstractController
             return $data;
         });
 
-
-        $getMails = $cache->get('emails_data', function (ItemInterface $item) use ($emailController, $entityManager, $encryptionSerivce) {
+        $getMails = $cache->get('emails_data', function (ItemInterface $item) use ($emailController, $entityManager, $encryptionSerivce, $cache) {
             $data = $emailController->getEmails($entityManager, $encryptionSerivce);
             if (!$data) {
+                if (isset($cache)) $cache->delete('emails_data');
                 $item->expiresAfter(0);
             } else {
                 $item->expiresAfter(20);
@@ -75,9 +82,10 @@ class IndexController extends AbstractController
             return $data;
         });
 
-        $getEvents = $cache->get('events_data', function (ItemInterface $item) use ($googleSyncController, $entityManager) {
+        $getEvents = $cache->get('events_data', function (ItemInterface $item) use ($googleSyncController, $entityManager, $cache) {
             $data = $googleSyncController->getEvents($entityManager);
             if (!$data) {
+                if (isset($cache)) $cache->delete('events_data');
                 $item->expiresAfter(0);
             } else {
                 $item->expiresAfter(20);
@@ -91,28 +99,28 @@ class IndexController extends AbstractController
             return $data;
         });
 
-        $weeklyProductionData = $cache->get('solar_edge_weekly_data', function (ItemInterface $item) use ($solarEdgeService, $entityManager) {
+        $weeklyProductionData = $cache->get('solar_edge_weekly_data', function (ItemInterface $item) use ($solarEdgeService, $entityManager, $cache) {
             $data = $solarEdgeService->getSolarEdgeDataWeekly($entityManager);
             if (!$data) {
+                if (isset($cache)) $cache->delete('solar_edge_weekly_data');
                 $item->expiresAfter(0);
             } else {
                 $item->expiresAfter(3600);
             }
             return $data;
         });
+
         $latestMail = $getMails['latestMail'] ?? null;
         $emailConfigured = $getMails['emailConfigured'] ?? false;
         $unreadCount = $getMails['unreadCount'] ?? 0;
 
         date_default_timezone_set('Europe/Warsaw');
-        $time = date('H:i');
 
         if (!$location && !$solarEdgeData && !$latestMail && !$spotify && !$getEvents) {
             $url = "https://" . ($_GET['ip'] ?? $_SERVER['SERVER_NAME']) . "/settings";
             return $this->render('notConfigured.html.twig', ['settings_url' => $url]);
         } else {
             return $this->render('index.html.twig', [
-                'time' => $time,
                 'weather' => $weatherData,
                 'solarData' => $solarEdgeData,
                 'weeklyProductionData' => $weeklyProductionData,
@@ -126,7 +134,8 @@ class IndexController extends AbstractController
                 'spotifyNowPlaying' => $spotify,
                 'events' => $getEvents,
                 'layout' => $layout,
-                'airQuality' => $airQuality
+                'airQuality' => $airQuality,
+                'countdown' => $countdown
             ]);
         }
     }

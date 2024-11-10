@@ -1,0 +1,55 @@
+<div class="col-md-4">
+    <div class="card">
+        <div class="card-body text-center">
+            <h5 class="card-title">Countdown</h5>
+            {% if countdown %}
+                {% for event in countdown %}
+                <h5 class="event-summary card-text mb-0"><b>{{ event.description }}</b></h5><br/>
+                <h5 class="card-text mb-0 event-summary" id="countdown-timer-{{ loop.index }}"></h5><br />
+                <script>
+                    const countdownDate{{ loop.index }} = new Date("{{ event.date|date('Y-m-d H:i:s') }}").getTime();
+                    const countdownTimer{{ loop.index }} = document.getElementById('countdown-timer-{{ loop.index }}');
+
+                    function updateCountdown{{ loop.index }}() {
+                        const now = new Date().getTime();
+                        const distance = countdownDate{{ loop.index }} - now;
+
+                        if (distance < 0) {
+                            countdownTimer{{ loop.index }}.innerHTML = "Countdown ended";
+                            clearInterval(interval{{ loop.index }});
+                            return;
+                        }
+
+                        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                        const daysText = days > 1 ? 'days' : 'day';
+                        const hoursText = hours > 1 ? 'hours' : 'hour';
+                        const minutesText = minutes > 1 ? 'minutes' : 'minute';
+                        const secondsText = seconds > 1 ? 'seconds' : 'second';
+
+                        if (days > 99) {
+                            countdownTimer{{ loop.index }}.innerHTML = `${days} ${daysText}`;
+                        } else if (days > 0) {
+                            countdownTimer{{ loop.index }}.innerHTML = `${days} ${daysText} ${hours} ${hoursText}`;
+                        } else if (hours > 0) {
+                            countdownTimer{{ loop.index }}.innerHTML = `${hours} ${hoursText} ${minutes} ${minutesText}`;
+                        } else if (minutes > 0) {
+                            countdownTimer{{ loop.index }}.innerHTML = `${minutes} ${minutesText} ${seconds} ${secondsText}`;
+                        } else {
+                            countdownTimer{{ loop.index }}.innerHTML = `${seconds} ${secondsText}`;
+                        }
+                    }
+
+                    const interval{{ loop.index }} = setInterval(updateCountdown{{ loop.index }}, 1000);
+                    updateCountdown{{ loop.index }}();
+                </script>
+                {% endfor %}
+            {% else %}
+                <p class="card-text">No countdown set</p>
+            {% endif %}
+        </div>
+    </div>
+</div>

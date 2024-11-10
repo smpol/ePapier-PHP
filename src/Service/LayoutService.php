@@ -15,7 +15,7 @@ class LayoutService
             'SolarEdge' => 'SolarEdge',
             'SolarEdgeChart' => 'SolarEdge Chart',
             'AirQuality' => 'Air Quality',
-            // Możesz dodać więcej komponentów tutaj
+            'Countdown' => 'Countdown',
         ];
     }
 }

@@ -5,7 +5,8 @@
             {% if emailConfigured %}
                 {% if latestMail %}
                     {% if unreadCount > 0 %}
-                        <p>You have <strong>{{ unreadCount }}</strong> unread messages.</p>
+                        <p class="event-summary" style="font-size: 15px;">You have <strong>{{ unreadCount }}</strong>
+                            unread messages.</p>
                     {% else %}
                         <p>You have no new emails.</p>
                     {% endif %}

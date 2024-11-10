@@ -3,10 +3,26 @@
         <div class="card-body text-center">
             <h5 class="card-title">Air Quality</h5>
             {% if airQuality %}
-                    <p class="card-text mb-0">European AQI - {{ airQuality.current.european_aqi }} {{airQuality.current_units.european_aqi}}</p>
-                    <p class="card-text mb-0">PM 10 - {{ airQuality.current.pm10 }} {{airQuality.current_units.pm10}}</p>
-                    <p class="card-text mb-0">PM 2.5 - {{ airQuality.current.pm2_5 }} {{airQuality.current_units.pm2_5}}</p>
-                    <p class="card-text mb-0">CO - {{ airQuality.current.carbon_monoxide}} {{ airQuality.current_units.carbon_monoxide}}</p>
+                <h4 class="card-text mb-0"><b>
+                {% if airQuality.current.european_aqi >= 0 and airQuality.current.european_aqi <= 20 %}
+                    Good
+                {% elseif airQuality.current.european_aqi >= 21 and airQuality.current.european_aqi <= 40 %}
+                    Fair
+                {% elseif airQuality.current.european_aqi >= 41 and airQuality.current.european_aqi <= 60 %}
+                    Moderate
+                {% elseif airQuality.current.european_aqi >= 61 and airQuality.current.european_aqi <= 80 %}
+                    Poor
+                {% elseif airQuality.current.european_aqi >= 81 and airQuality.current.european_aqi <= 100 %}
+                    Very Poor
+                {% else %}
+                    Extremely Poor
+                {% endif %}
+                </b></h4>
+                <p class="card-text mb-0">PM 10 - {{ airQuality.current.pm10 }} {{ airQuality.current_units.pm10 }}</p>
+                <p class="card-text mb-0">PM 2.5
+                    - {{ airQuality.current.pm2_5 }} {{ airQuality.current_units.pm2_5 }}</p>
+                <p class="card-text mb-0">CO
+                    - {{ airQuality.current.carbon_monoxide }} {{ airQuality.current_units.carbon_monoxide }}</p>
             {% else %}
                 <p class="card-text">No Air Quality data available.</p>
             {% endif %}

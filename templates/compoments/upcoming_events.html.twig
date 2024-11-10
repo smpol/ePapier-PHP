@@ -10,11 +10,9 @@
                             <small>
                                 {{ event.start | date('d-m-Y H:i') }}
                             </small>
-                            <br/>
-                            <small> {{ event.location or '' }} </small>
                         </li>
                         {% if not loop.last and loop.index0 < 2 %}
-                            <hr/>
+                            <hr style="margin: 5px 0"/>
                         {% endif %}
                     {% endfor %}
                 {% else %}

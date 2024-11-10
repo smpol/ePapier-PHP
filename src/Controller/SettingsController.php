@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Countdown;
 use App\Entity\EmailSettings;
 use App\Entity\GoogleAccessToken;
 use App\Entity\Location;
@@ -17,13 +18,14 @@ use Symfony\Component\Routing\Annotation\Route;
 class SettingsController extends AbstractController
 {
     #[Route('/settings', name: 'settings')]
-    public function settings(EntityManagerInterface $entityManager, LayoutService $componentService, LayoutConfigController $layoutConfigController,): Response
+    public function settings(EntityManagerInterface $entityManager, LayoutService $componentService, LayoutConfigController $layoutConfigController): Response
     {
         $solarEdgeSettings = $entityManager->getRepository(SolarEdge::class)->findBy([], ['id' => 'DESC'], 1);
         $emailSettings = $entityManager->getRepository(EmailSettings::class)->findBy([], ['id' => 'DESC'], 1);
         $location = $entityManager->getRepository(Location::class)->find(1);
         $spotifySettings = $entityManager->getRepository(Spotify::class)->findBy([], ['id' => 'DESC'], 1);
         $googleSettings = $entityManager->getRepository(GoogleAccessToken::class)->findBy([], ['id' => 'DESC'], 1);
+        $countDown = $entityManager->getRepository(Countdown::class)->findAll();
 
         // Pobieramy dostępne komponenty
         $availableComponents = $componentService->getAvailableComponents();
@@ -38,6 +40,7 @@ class SettingsController extends AbstractController
             'googleSettings' => $googleSettings,
             'availableComponents' => $availableComponents,
             'selectedComponents' => $layout,
+            'countDown' => $countDown,
         ]);
     }
 
@@ -62,7 +65,7 @@ class SettingsController extends AbstractController
 
         // Zapisujemy nową kolejność komponentów w bazie danych lub pliku JSON
         // (Tutaj można zapisać komponenty w bazie danych lub pliku)
-        
+
         $this->addFlash('success', 'Kolejność komponentów została zapisana.');
         return $this->redirectToRoute('settings');
     }

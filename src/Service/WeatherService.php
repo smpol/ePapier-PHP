@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Service;
 
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -39,7 +40,7 @@ class WeatherService
 
             return $airQuality;
 
-        } catch (TransportExceptionInterface | ServerExceptionInterface | ClientExceptionInterface | RedirectionExceptionInterface $e) {
+        } catch (TransportExceptionInterface|ServerExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface $e) {
             // Log the exception or handle it as needed, then return null
             return null;
         }
@@ -67,14 +68,14 @@ class WeatherService
             $weatherData = $response->toArray();
 
             // Add weather icon based on the weather code
-            $weatherData['current_weather']['icon'] = $this->getWeatherIcon($weatherData['current_weather']['weathercode']);
+            $weatherData['current_weather']['icon'] = $this->getWeatherIcon($weatherData['current_weather']['weathercode'], $weatherData['current_weather']['is_day']);
 
             // Process the forecast data
             $weatherData['forecast_data'] = $this->processForecast($weatherData['daily']);
 
             return $weatherData;
 
-        } catch (TransportExceptionInterface | ServerExceptionInterface | ClientExceptionInterface | RedirectionExceptionInterface $e) {
+        } catch (TransportExceptionInterface|ServerExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface $e) {
             // Log the exception or handle it as needed, then return null
             return null;
         }
@@ -83,9 +84,9 @@ class WeatherService
     /**
      * Zwraca ikonę pogody na podstawie kodu pogodowego.
      */
-    private function getWeatherIcon(int $weatherCode): string
+    private function getWeatherIcon(int $weatherCode, int $isDay = 1): string
     {
-        $iconMap = [
+        $iconMapDay = [
             // Clear sky
             0 => 'wi-day-sunny',
 
@@ -140,6 +141,68 @@ class WeatherService
             96 => 'wi-thunderstorm',
             99 => 'wi-thunderstorm',
         ];
+
+        $iconMapNight = [
+            // Clear sky
+            0 => 'wi-night-clear',
+
+            // Mainly clear, partly cloudy, overcast
+            1 => 'wi-night-alt-cloudy',
+            2 => 'wi-night-alt-cloudy',
+            3 => 'wi-night-alt-cloudy',
+
+            // Fog and depositing rime fog
+            45 => 'wi-night-fog',
+            48 => 'wi-night-fog',
+
+            // Drizzle: Light, moderate, dense intensity
+            51 => 'wi-night-alt-sprinkle',
+            53 => 'wi-night-alt-sprinkle',
+            55 => 'wi-night-alt-sprinkle',
+
+            // Freezing Drizzle: Light and dense intensity
+            56 => 'wi-night-alt-sleet',
+            57 => 'wi-night-alt-sleet',
+
+            // Rain: Slight, moderate, heavy intensity
+            61 => 'wi-night-alt-rain',
+            63 => 'wi-night-alt-rain',
+            65 => 'wi-night-alt-rain',
+
+            // Freezing Rain: Light and heavy intensity
+            66 => 'wi-night-alt-sleet',
+            67 => 'wi-night-alt-sleet',
+
+            // Snow fall: Slight, moderate, heavy intensity
+            71 => 'wi-night-alt-snow',
+            73 => 'wi-night-alt-snow',
+            75 => 'wi-night-alt-snow',
+
+            // Snow grains
+            77 => 'wi-night-alt-snow-wind',
+
+            // Rain showers: Slight, moderate, violent
+            80 => 'wi-night-alt-showers',
+            81 => 'wi-night-alt-showers',
+            82 => 'wi-night-alt-showers',
+
+            // Snow showers slight and heavy
+            85 => 'wi-night-alt-snow',
+            86 => 'wi-night-alt-snow',
+
+            // Thunderstorm: Slight or moderate
+            95 => 'wi-night-alt-thunderstorm',
+
+            // Thunderstorm with slight and heavy hail
+            96 => 'wi-night-alt-thunderstorm',
+            99 => 'wi-night-alt-thunderstorm',
+        ];
+
+        if ($isDay) {
+            $iconMap = $iconMapDay;
+        } else {
+            $iconMap = $iconMapNight;
+        }
 
         return $iconMap[$weatherCode] ?? 'wi-na';
     }

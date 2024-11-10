@@ -32,8 +32,7 @@ class SolarEdgeController extends AbstractController
     public function deleteSolarEdge(EntityManagerInterface $entityManager): Response
     {
         $solarEdge = $entityManager->getRepository(SolarEdge::class)->findOneBy([], ['id' => 'DESC']);
-        if($solarEdge)
-        {
+        if ($solarEdge) {
             $entityManager->remove($solarEdge);
             $entityManager->flush();
         }

@@ -114,6 +114,13 @@
                 <a
                         href="#"
                         class="list-group-item list-group-item-action"
+                        onclick="showContent('countdown-settings')"
+                >
+                    Countdown Settings
+                </a>
+                <a
+                        href="#"
+                        class="list-group-item list-group-item-action"
                         onclick="showContent('layout-settings')"
                 >
                     Layout Settings
@@ -352,6 +359,64 @@
                                     Disconnect from Spotify
                                 </button>
                             </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div id="countdown-settings" class="content-section" style="display: none">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3>Countdown Settings</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if not countDown %}
+                            <form action="{{ path('setCountdown') }}" method="post">
+                                <div class="mb-3">
+                                    <label for="countdown_date" class="form-label
+                                    ">Countdown Date</label>
+                                    <input type="datetime-local" class="form-control" id="countdown_date"
+                                           name="countdown_date" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="countdown_title" class="form-label
+                                    ">Countdown Title</label>
+                                    <input type="text" class="form-control" id="countdown_title" name="countdown_title"
+                                           minlength="1" maxlength="18"
+                                           required>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save"></i> Save Countdown
+                                    </button>
+                                </div>
+                            </form>
+                        {% else %}
+                            {% for countdown in countDown %}
+                                <form action="{{ path('deleteCountdown') }}" method="post">
+                                    <input type="hidden" name="countdown_id" value="{{ countdown.id }}">
+                                    <button type="submit" class="btn btn-danger" style="margin-bottom: 5px">
+                                        Remove Countdown {{ countdown.description }}
+                                    </button>
+                                </form>
+                            {% endfor %}
+                            {% if countDown|length < 2 %}
+                                <form action="{{ path('setCountdown') }}" method="post" style="margin-top: 15px;">
+                                    <div class="mb-3">
+                                        <label for="countdown_date" class="form-label">Countdown Date</label>
+                                        <input type="datetime-local" class="form-control" id="countdown_date" name="countdown_date" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="countdown_title" class="form-label">Countdown Title</label>
+                                        <input type="text" class="form-control" id="countdown_title" name="countdown_title" minlength="1" maxlength="18" required>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-save"></i> Save Countdown
+                                        </button>
+                                    </div>
+                                </form>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>

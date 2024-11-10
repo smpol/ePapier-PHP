@@ -168,11 +168,11 @@ class SpotifyController extends AbstractController
                 if ($response->getStatusCode() === 200) {
                     $responseData = $response->toArray();
                     $title = $responseData['item']['name'];
-                    $artist = $responseData['item']['artists'][0]['name'];
+                    $artists = array_map(fn($artist) => $artist['name'], $responseData['item']['artists']);
                     $album = $responseData['item']['album']['name'];
                     return [
                         'title' => $title,
-                        'artist' => $artist,
+                        'artists' => $artists,
                         'album' => $album,
                     ];
                 } else {

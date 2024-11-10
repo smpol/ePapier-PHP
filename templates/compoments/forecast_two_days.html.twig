@@ -9,13 +9,13 @@
                             <h4 style=" margin-bottom: 2px">
                                 {{ forecast.label }}
                             </h4>
-                            <p style="font-size: 15px; margin-bottom: 2px">
+                            <p style="font-size: 15px; margin-bottom: 2px"><b>
                                 Max: {{ forecast.temperature_max }}°C<br>
                                 Min: {{ forecast.temperature_min }}°C
-                            </p>
-                            <p style="font-size: 10px; margin-bottom: 2px">
-                                Precipitation: {{ forecast.precipitation_probability }}%
-                            <i class="wi {{ forecast.weather_code }} weather-icon ms-2"></i>
+                                </b></p>
+                            <p style="font-size: 11px; margin-bottom: 2px"><b>
+                                Precipitation: {{ forecast.precipitation_probability }}%</b>
+                                <i class="wi {{ forecast.weather_code }} weather-icon ms-2"></i>
                         </div>
                     {% endfor %}
                 </div>

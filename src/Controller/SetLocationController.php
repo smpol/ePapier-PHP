@@ -17,15 +17,12 @@ class SetLocationController extends AbstractController
         $lng = $_POST['longitude'];
 
         $location = $entityManager->getRepository(Location::class)->find(1);
-        if (!$location)
-        {
+        if (!$location) {
             $newLocation = new Location();
             $newLocation->setLat($lat);
             $newLocation->setLeng($lng);
             $entityManager->persist($newLocation);
-        }
-        else
-        {
+        } else {
             $location->setLat($lat);
             $location->setLeng($lng);
         }
