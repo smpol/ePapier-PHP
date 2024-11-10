@@ -4,13 +4,20 @@ Repozytorium odpowiedzialne za część projektu wykorzystującą język PHP w f
 
 ![podgląd interfejsu](screen.png)
 
-> **Uwaga**: Projekt znajduje się w fazie rozwoju i nie stanowi wersji finalnej. W bieżącej wersji mogą występować błędy oraz niedociągnięcia logiczne, które będą poprawiane w przyszłych aktualizacjach.
+> [!IMPORTANT]
+> Projekt znajduje się w fazie rozwoju i nie stanowi wersji finalnej. W bieżącej wersji mogą występować błędy oraz niedociągnięcia logiczne, które będą poprawiane w przyszłych aktualizacjach.
 >
 > Dokumentacja również jest w trakcie tworzenia i może być uzupełniana wraz z postępem prac nad projektem.
 
 ## Cel projektu
 
 Aby stworzyć interfejs graficzny wyświetlający zawartość na ekranie ePapier, zdecydowałem się na budowę aplikacji webowej w PHP przy użyciu frameworka Symfony. Projekt pełni również rolę edukacyjną, umożliwiając naukę pracy w Symfony.
+
+## Funkcjonalności
+
+Domyślnie na stronie głównej znajduje się interfejs wyświetlany na ekranie ePapier. Jak widać na zrzucie ekranu wyżej ma formę bardzo prostą - ze względu na ograniczenia techinczne zawartość musi być prosta, czytelna oraz czarno-biała.
+
+Za to na podstronie `/settings` znajduje się panel sterowania umożliwiający zmianę treści wyświetlanych na ekranie. Można ustawić lokalizację pogody, dodać swoje konta np. Spotify, Google Calendar czy też dać dostęp do własnej instalacji fotowoltaicznej marki SolarEdge i inne rzeczy
 
 ## Zmienne środowiskowe
 
