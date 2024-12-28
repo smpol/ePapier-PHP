@@ -6,15 +6,16 @@ use App\Entity\Location;
 use App\Service\UpdateScreenService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 class SetLocationController extends AbstractController
 {
     #[Route('/set-location', name: 'set-location')]
-    public function setLocation(EntityManagerInterface $entityManager)
+    public function setLocation(Request $request, EntityManagerInterface $entityManager)
     {
-        $lat = $_POST['latitude'];
-        $lng = $_POST['longitude'];
+        $lat = $request->request->get('latitude');
+        $lng = $request->request->get('longitude');
 
         $location = $entityManager->getRepository(Location::class)->find(1);
         if (!$location) {

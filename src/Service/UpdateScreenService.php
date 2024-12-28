@@ -12,7 +12,6 @@ class UpdateScreenService
 
     public function __construct()
     {
-        // Tworzenie instancji klienta HTTP automatycznie
         $this->httpClient = HttpClient::create();
     }
 
@@ -20,11 +19,7 @@ class UpdateScreenService
     {
         try {
             $response = $this->httpClient->request('GET', 'http://' . $_ENV['REDIRECT_URL'] . ':5002/updatescreen');
-            //print response
-//            dd($response->toArray());
         } catch (TransportExceptionInterface $e) {
-            // Obsłuż wyjątek lub zaloguj, jeśli to konieczne
-//            dd($e->getMessage());/
         }
     }
 }

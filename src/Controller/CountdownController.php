@@ -6,14 +6,15 @@ use App\Entity\Countdown;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Request;
 
 class CountdownController extends AbstractController
 {
     #[Route('/set-countdown', name: 'setCountdown')]
-    public function setCountdown(EntityManagerInterface $entityManager)
+    public function setCountdown(Request $request, EntityManagerInterface $entityManager)
     {
-        $dateTime = $_POST['countdown_date'];
-        $description = $_POST['countdown_title'];
+        $dateTime = $request->request->get('countdown_date');
+        $description = $request->request->get('countdown_title');
 
         // Sprawdź, ile odliczań już istnieje
         $countdowns = $entityManager->getRepository(Countdown::class)->findAll();
@@ -29,9 +30,9 @@ class CountdownController extends AbstractController
     }
 
     #[Route('/delete-countdown', name: 'deleteCountdown')]
-    public function deleteCountdown(EntityManagerInterface $entityManager)
+    public function deleteCountdown(Request $request, EntityManagerInterface $entityManager)
     {
-        $id = $_POST['countdown_id'];
+        $id = $request->request->get('countdown_id');
         $countdown = $entityManager->getRepository(Countdown::class)->find($id);
         if ($countdown) {
             $entityManager->remove($countdown);

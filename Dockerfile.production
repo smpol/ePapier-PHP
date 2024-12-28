@@ -1,4 +1,4 @@
-FROM dunglas/frankenphp
+FROM dunglas/frankenphp:php8.2-alpine
 
 # Skopiuj wszystkie pliki aplikacji
 COPY . /app

@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Layout;
+use App\Service\LayoutService;
 use App\Service\UpdateScreenService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,44 +14,40 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class LayoutConfigController extends AbstractController
 {
-    private $serializer;
     private $request;
 
-    public function __construct(SerializerInterface $serializer, RequestStack $requestStack)
+    public function __construct(RequestStack $requestStack)
     {
-        $this->serializer = $serializer;
         $this->request = $requestStack->getCurrentRequest();
     }
 
-    public function getLayout(): Response
+    public function getLayout(EntityManagerInterface $entityManager): Response
     {
-        // Ścieżka do pliku JSON
-        $filePath = $this->getParameter('kernel.project_dir') . '/public/layout_config.json';
+        $data = $entityManager->getRepository(Layout::class)->findAll();
 
-        // Sprawdzamy, czy plik istnieje
-        if (!file_exists($filePath)) {
-            // Jeśli plik nie istnieje, tworzymy domyślną tablicę
-            $defaultLayout = ['CurrentWeather', 'Forecast', 'Spotify', 'GoogleCalendar', 'Emails', 'SolarEdge'];
-
-            // Serializacja domyślnej konfiguracji do JSON
-            $jsonContent = json_encode($defaultLayout);
-
-            // Zapis pliku na dysk
-            file_put_contents($filePath, $jsonContent);
-
-            $this->addFlash('success', 'Plik został automatycznie wygenerowany z domyślnymi wartościami.');
-        } else {
-            // Jeśli plik istnieje, wczytujemy go
-            $jsonContent = file_get_contents($filePath);
-            $defaultLayout = json_decode($jsonContent, true);
+        if (!$data) {
+            $defaultLayout = ['CurrentWeather', 'Forecast', 'Spotify', 'GoogleCalendar', 'Emails', 'AirQuality'];
+            foreach ($defaultLayout as $component) {
+                $layout = new Layout(); // Tworzymy nową instancję dla każdego komponentu
+                $layout->setLayout($component, null);
+                $entityManager->persist($layout);
+            }
+            $entityManager->flush();
         }
 
-        // Zwracamy tablicę jako JSON (można jej użyć w API)
-        return $this->json($defaultLayout);
+        $layout = $entityManager->getRepository(Layout::class)->findAll();
+        $layoutMainArray = [];
+        $layoutReplecmentArray = [];
+        foreach ($layout as $item) {
+            $layoutMainArray[] = $item->getMain();
+            $layoutReplecmentArray[] = $item->getReplacement();
+        }
+
+        return $this->json(['layout' => $layoutMainArray, 'replacment' => $layoutReplecmentArray]);
     }
 
     #[Route("/set-layout", name: 'set-layout')]
-    public function setLayout()
+    public function setLayout(EntityManagerInterface $entityManager)
     {
         // Pobieramy dane z formularza POST z użyciem $this->request
         $window1 = $this->request->request->get('component1');
@@ -58,22 +57,38 @@ class LayoutConfigController extends AbstractController
         $window5 = $this->request->request->get('component5');
         $window6 = $this->request->request->get('component6');
 
+        $replacment1 = $this->request->request->get('replacement1');
+        $replacment2 = $this->request->request->get('replacement2');
+        $replacment3 = $this->request->request->get('replacement3');
+        $replacment4 = $this->request->request->get('replacement4');
+        $replacment5 = $this->request->request->get('replacement5');
+        $replacment6 = $this->request->request->get('replacement6');
+
         // Walidacja danych (można dodać bardziej zaawansowane reguły)
         if (!$window1 || !$window2 || !$window3 || !$window4 || !$window5 || !$window6) {
             return $this->json(['error' => 'Wszystkie pola muszą być wypełnione!'], Response::HTTP_BAD_REQUEST);
         }
 
         // Tworzymy tablicę z wartościami okien
-        $layout = [$window1, $window2, $window3, $window4, $window5, $window6];
+        $layoutNew = [$window1, $window2, $window3, $window4, $window5, $window6];
+        $replacmentNew = [$replacment1, $replacment2, $replacment3, $replacment4, $replacment5, $replacment6];
 
-        // Serializacja tablicy do JSON
-        $jsonContent = json_encode($layout);
 
-        // Ścieżka do pliku JSON
-        $filePath = $this->getParameter('kernel.project_dir') . '/public/layout_config.json';
+        // Usuwamy wszystko z tabeli
+        $layoutRepository = $entityManager->getRepository(Layout::class);
+        $allLayouts = $layoutRepository->findAll();
+        foreach ($allLayouts as $layout) {
+            $entityManager->remove($layout);
+        }
+        $entityManager->flush();
 
-        // Zapisanie pliku na dysku
-        file_put_contents($filePath, $jsonContent);
+        // Zapisujemy nowe wartości
+        for ($i = 0; $i < count($layoutNew); $i++) {
+            $layoutEntity = new Layout();
+            $layoutEntity->setLayout($layoutNew[$i], $replacmentNew[$i]);
+            $entityManager->persist($layoutEntity);
+        }
+        $entityManager->flush();
 
         $screen = new UpdateScreenService();
         $screen->updateScreen();

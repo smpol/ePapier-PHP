@@ -404,11 +404,13 @@
                                 <form action="{{ path('setCountdown') }}" method="post" style="margin-top: 15px;">
                                     <div class="mb-3">
                                         <label for="countdown_date" class="form-label">Countdown Date</label>
-                                        <input type="datetime-local" class="form-control" id="countdown_date" name="countdown_date" required>
+                                        <input type="datetime-local" class="form-control" id="countdown_date"
+                                               name="countdown_date" required>
                                     </div>
                                     <div class="mb-3">
                                         <label for="countdown_title" class="form-label">Countdown Title</label>
-                                        <input type="text" class="form-control" id="countdown_title" name="countdown_title" minlength="1" maxlength="18" required>
+                                        <input type="text" class="form-control" id="countdown_title"
+                                               name="countdown_title" minlength="1" maxlength="18" required>
                                     </div>
                                     <div class="d-flex justify-content-between">
                                         <button type="submit" class="btn btn-success">
@@ -426,138 +428,157 @@
                 <form method="POST" action="{{ path('set-layout') }}">
                     <div class="card shadow-lg mb-4">
                         <div class="card-header bg-primary text-white text-center">
-                            <h3>Set Component Order</h3>
+                            <h3>Set Dashboard Layout</h3>
                         </div>
                         <div class="card-body">
-                            <p>Choose the order of the components you want to display on the dashboard:</p>
-
-                            <div id="components-container">
+                            <div id="dashboard-grid" class="row">
                                 {% for i in 0..5 %}
-                                    <div class="mb-3 component-select" data-index="{{ i }}">
-                                        <label for="component{{ i + 1 }}"
-                                               class="form-label">Component {{ i + 1 }}</label>
-                                        <div class="input-group">
-                                            <select class="form-select component-select-input" id="component{{ i + 1 }}"
-                                                    name="component{{ i + 1 }}" required>
-                                                <option value="">Select component</option>
-                                                {% for key, name in availableComponents %}
-                                                    <option value="{{ key }}" {{ selectedComponents[i] == key ? 'selected' : '' }}>
-                                                        {{ name }}
-                                                    </option>
-                                                {% endfor %}
-                                            </select>
-                                            <button type="button" class="btn btn-outline-secondary remove-component"
-                                                    title="Remove selection">
-                                                &minus; <!-- Unicode znak minus -->
-                                            </button>
+                                    <div class="col-md-4 mb-4">
+                                        <div class="card component-card">
+                                            <div class="card-header text-center">
+                                                <label for="component{{ i + 1 }}"
+                                                       class="form-label">Component {{ i + 1 }}</label>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="input-group mb-2">
+                                                    <select class="form-select component-select-input"
+                                                            id="component{{ i + 1 }}"
+                                                            name="component{{ i + 1 }}" required>
+                                                        <option value="">Select component</option>
+                                                        {% for key, name in availableComponents %}
+                                                            <option value="{{ key }}" {{ selectedComponents[i] == key ? 'selected' : '' }}>
+                                                                {{ name }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+
+                                                <label for="replacement{{ i + 1 }}" class="form-label mt-2">Replacement
+                                                    for Component {{ i + 1 }}</label>
+                                                <div class="input-group">
+                                                    <select class="form-select replacement-select-input"
+                                                            id="replacement{{ i + 1 }}"
+                                                            name="replacement{{ i + 1 }}">
+                                                        <option value="">No replacement</option>
+                                                        {% for key, name in availableComponents %}
+                                                            <option value="{{ key }}" {{ replacementLayout[i] == key ? 'selected' : '' }}>
+                                                                {{ name }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 {% endfor %}
                             </div>
 
-                            <button type="button" id="add-component" class="btn btn-outline-primary mt-3">
-                                &#43; Reset All Compoments <!-- Unicode znak plus -->
-                            </button>
+                            <div class="text-center mt-3">
+                                <button type="button" id="reset-layout" class="btn btn-outline-primary">
+                                    &#43; Reset Layout
+                                </button>
+                            </div>
 
                             <div id="validation-message" class="text-danger mt-3" style="display: none;">
-                                All fields must have a selected value and cannot be repeated.
+                                All fields must have a selected value and cannot be repeated in the main or replacement
+                                fields.
                             </div>
                         </div>
                         <div class="card-footer text-center">
-                            <button type="submit" class="btn btn-success">Save Component Order</button>
+                            <button type="submit" class="btn btn-success">Save Layout</button>
                         </div>
                     </div>
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function () {
-                            const componentsContainer = document.getElementById('components-container');
-                            const addComponentBtn = document.getElementById('add-component');
-                            const validationMessage = document.getElementById('validation-message');
+                </form>
+            </div>
 
-                            // Funkcja do aktualizacji dostępnych opcji w selectach
-                            function updateSelectOptions() {
-                                const selects = document.querySelectorAll('.component-select-input');
-                                const selectedValues = Array.from(selects).map(select => select.value).filter(val => val !== '');
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const dashboardGrid = document.getElementById('dashboard-grid');
+                    const resetLayoutBtn = document.getElementById('reset-layout');
+                    const validationMessage = document.getElementById('validation-message');
 
-                                selects.forEach(select => {
-                                    const currentValue = select.value;
-                                    // Włącz wszystkie opcje
-                                    Array.from(select.options).forEach(option => {
-                                        option.disabled = false;
-                                    });
-                                    // Wyłącz opcje już wybrane w innych selectach
-                                    selectedValues.forEach(value => {
-                                        if (value !== currentValue) {
-                                            const optionToDisable = select.querySelector(`option[value="${value}"]`);
-                                            if (optionToDisable) {
-                                                optionToDisable.disabled = true;
-                                            }
-                                        }
-                                    });
-                                });
-                            }
+                    function updateSelectOptions() {
+                        const mainSelects = document.querySelectorAll('.component-select-input');
+                        const replacementSelects = document.querySelectorAll('.replacement-select-input');
 
-                            // Funkcja do walidacji unikalności wyborów i pełności formularza
-                            function validateForm() {
-                                const selects = document.querySelectorAll('.component-select-input');
-                                const selectedValues = Array.from(selects).map(select => select.value);
-                                const allSelected = selectedValues.every(val => val !== '');
-                                const uniqueValues = new Set(selectedValues);
-                                const allUnique = uniqueValues.size === selectedValues.length;
+                        const selectedMainValues = Array.from(mainSelects).map(select => select.value).filter(val => val !== '');
+                        const selectedReplacementValues = Array.from(replacementSelects).map(select => select.value).filter(val => val !== '');
 
-                                if (!allSelected || !allUnique) {
-                                    validationMessage.style.display = 'block';
-                                    return false;
-                                } else {
-                                    validationMessage.style.display = 'none';
-                                    return true;
-                                }
-                            }
-
-                            // Inicjalne wyłączenie opcji
-                            updateSelectOptions();
-
-                            // Obsługa zmiany wartości w selectach
-                            componentsContainer.addEventListener('change', function (e) {
-                                if (e.target && e.target.classList.contains('component-select-input')) {
-                                    updateSelectOptions();
-                                    validateForm();
-                                }
-                            });
-
-                            // Obsługa resetowania wszystkich wyborów
-                            addComponentBtn.addEventListener('click', function () {
-                                if (confirm('Czy chcesz zresetować wszystkie wybory komponentów?')) {
-                                    const selects = document.querySelectorAll('.component-select-input');
-                                    selects.forEach(select => {
-                                        select.value = '';
-                                    });
-                                    updateSelectOptions();
-                                    validateForm();
-                                }
-                            });
-
-                            // Obsługa usuwania wybranego komponentu
-                            componentsContainer.addEventListener('click', function (e) {
-                                if (e.target && e.target.closest('.remove-component')) {
-                                    const removeBtn = e.target.closest('.remove-component');
-                                    const select = removeBtn.closest('.component-select').querySelector('.component-select-input');
-                                    select.value = '';
-                                    updateSelectOptions();
-                                    validateForm();
-                                }
-                            });
-
-                            // Walidacja przy wysyłaniu formularza
-                            document.querySelector('form').addEventListener('submit', function (event) {
-                                if (!validateForm()) {
-                                    event.preventDefault(); // Zatrzymanie wysyłania formularza, jeśli walidacja nie przejdzie
-                                    alert('Upewnij się, że wszystkie pola są wypełnione i nie ma duplikatów.');
+                        mainSelects.forEach(select => {
+                            const currentValue = select.value;
+                            Array.from(select.options).forEach(option => option.disabled = false);
+                            selectedMainValues.forEach(value => {
+                                if (value !== currentValue) {
+                                    const optionToDisable = select.querySelector(`option[value="${value}"]`);
+                                    if (optionToDisable) optionToDisable.disabled = true;
                                 }
                             });
                         });
-                    </script>
-                </form>
-            </div>
+
+                        replacementSelects.forEach(select => {
+                            const currentValue = select.value;
+                            Array.from(select.options).forEach(option => option.disabled = false);
+                            selectedMainValues.concat(selectedReplacementValues).forEach(value => {
+                                if (value !== currentValue) {
+                                    const optionToDisable = select.querySelector(`option[value="${value}"]`);
+                                    if (optionToDisable) optionToDisable.disabled = true;
+                                }
+                            });
+                        });
+                    }
+
+                    function validateForm() {
+                        const mainSelects = document.querySelectorAll('.component-select-input');
+                        const replacementSelects = document.querySelectorAll('.replacement-select-input');
+
+                        const selectedMainValues = Array.from(mainSelects).map(select => select.value);
+                        const selectedReplacementValues = Array.from(replacementSelects).map(select => select.value).filter(val => val !== '');
+
+                        const allMainSelected = selectedMainValues.every(val => val !== '');
+                        const uniqueMainValues = new Set(selectedMainValues);
+                        const uniqueReplacementValues = new Set(selectedReplacementValues);
+
+                        const allUniqueMain = uniqueMainValues.size === selectedMainValues.length;
+                        const noOverlap = !selectedReplacementValues.some(val => uniqueMainValues.has(val));
+
+                        if (!allMainSelected || !allUniqueMain || !noOverlap) {
+                            validationMessage.style.display = 'block';
+                            return false;
+                        } else {
+                            validationMessage.style.display = 'none';
+                            return true;
+                        }
+                    }
+
+                    updateSelectOptions();
+
+                    dashboardGrid.addEventListener('change', function (e) {
+                        if (e.target && (e.target.classList.contains('component-select-input') || e.target.classList.contains('replacement-select-input'))) {
+                            updateSelectOptions();
+                            validateForm();
+                        }
+                    });
+
+                    resetLayoutBtn.addEventListener('click', function () {
+                        if (confirm('Are you sure you want to reset the layout?')) {
+                            const mainSelects = document.querySelectorAll('.component-select-input');
+                            const replacementSelects = document.querySelectorAll('.replacement-select-input');
+
+                            mainSelects.forEach(select => select.value = '');
+                            replacementSelects.forEach(select => select.value = '');
+                            updateSelectOptions();
+                            validateForm();
+                        }
+                    });
+
+                    document.querySelector('form').addEventListener('submit', function (event) {
+                        if (!validateForm()) {
+                            event.preventDefault();
+                            alert('Ensure all fields are filled and there are no duplicates.');
+                        }
+                    });
+                });
+            </script>
 
 
         </div>

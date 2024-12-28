@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class SettingsController extends AbstractController
 {
-    #[Route('/settings', name: 'settings')]
+    #[Route('/', name: 'settings')]
     public function settings(EntityManagerInterface $entityManager, LayoutService $componentService, LayoutConfigController $layoutConfigController): Response
     {
         $solarEdgeSettings = $entityManager->getRepository(SolarEdge::class)->findBy([], ['id' => 'DESC'], 1);
@@ -30,8 +30,10 @@ class SettingsController extends AbstractController
         // Pobieramy dostępne komponenty
         $availableComponents = $componentService->getAvailableComponents();
 
-        $layoutResponse = $layoutConfigController->getLayout();
-        $layout = json_decode($layoutResponse->getContent(), true);
+        $layoutResponse = $layoutConfigController->getLayout($entityManager);
+        $layoutJson = json_decode($layoutResponse->getContent(), true);
+        $layout = $layoutJson['layout'];
+        $replacmentLayout = $layoutJson['replacment'];
         return $this->render('settings.html.twig', [
             'solarEdgeSettings' => $solarEdgeSettings,
             'emailSettings' => $emailSettings,
@@ -40,33 +42,8 @@ class SettingsController extends AbstractController
             'googleSettings' => $googleSettings,
             'availableComponents' => $availableComponents,
             'selectedComponents' => $layout,
+            'replacementLayout' => $replacmentLayout,
             'countDown' => $countDown,
         ]);
-    }
-
-    #[Route('/save-component-order', name: 'save_component_order', methods: ['POST'])]
-    public function saveComponentOrder(Request $request, LayoutService $componentService): Response
-    {
-        // Pobieramy komponenty z formularza
-        $components = [
-            $request->request->get('component1'),
-            $request->request->get('component2'),
-            $request->request->get('component3'),
-            $request->request->get('component4'),
-            $request->request->get('component5'),
-            $request->request->get('component6'),
-        ];
-
-        // Sprawdzamy, czy są duplikaty
-        if (count($components) !== count(array_unique($components))) {
-            $this->addFlash('error', 'Nie możesz wybrać tego samego komponentu więcej niż raz.');
-            return $this->redirectToRoute('settings');
-        }
-
-        // Zapisujemy nową kolejność komponentów w bazie danych lub pliku JSON
-        // (Tutaj można zapisać komponenty w bazie danych lub pliku)
-
-        $this->addFlash('success', 'Kolejność komponentów została zapisana.');
-        return $this->redirectToRoute('settings');
     }
 }
