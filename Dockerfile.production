@@ -3,9 +3,7 @@ FROM dunglas/frankenphp:php8.2-alpine
 # Skopiuj wszystkie pliki aplikacji
 COPY . /app
 
-# Usuń zbędne pliki, ustaw plik środowiska produkcyjnego
-RUN rm -rf .env .env.dev migrations vendor
-RUN mv .env.prod .env
+# Usuń zbędne pliki
 RUN mkdir -p var && chmod -R 775 var
 
 ENV COMPOSER_ALLOW_SUPERUSER=1

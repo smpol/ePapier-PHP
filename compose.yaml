@@ -10,11 +10,3 @@ services:
     environment:
       - COMPOSER_ALLOW_SUPERUSER=1
     restart: always
-  developent-server:
-    image: shinsenter/symfony:latest
-    volumes:
-      - ./:/var/www/html
-    ports:
-      - "8001:80"
-    env_file:
-      - .env.dev

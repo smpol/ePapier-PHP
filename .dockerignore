@@ -27,6 +27,7 @@
 .env.test
 .env.dev
 .env.prod
+.env.example
 
 # Project-specific files
 public/layout_config.json
