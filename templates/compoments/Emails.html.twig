@@ -1,0 +1,29 @@
+<div class="col-md-4">
+    <div class="card">
+        <div class="card-body text-center">
+            <h5 class="card-title">Email Notifications</h5>
+            {% if emailConfigured %}
+                {% if latestMail %}
+                    {% if unreadCount > 0 %}
+                        <p class="event-summary" style="font-size: 15px;">You have <strong>{{ unreadCount }}</strong>
+                            unread messages.</p>
+                    {% else %}
+                        <p>You have no new emails.</p>
+                    {% endif %}
+                    <h6>Latest Email:</h6>
+                    <ul class="list-unstyled">
+                        <li>
+                            <strong class="event-summary">{{ latestMail.subject }}</strong><br/>
+                            <small class="event-summary">From: {{ latestMail.from }}</small><br/>
+                            <small>Date: {{ latestMail.date }}</small>
+                        </li>
+                    </ul>
+                {% else %}
+                    <p>No emails in the inbox.</p>
+                {% endif %}
+            {% else %}
+                <p>No email settings configured.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>

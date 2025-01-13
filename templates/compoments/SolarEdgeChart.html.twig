@@ -1,0 +1,91 @@
+<div class="col-md-4">
+    <div class="card">
+        <div class="card-body text-center">
+            {% if weeklyProductionData %}
+                <canvas id="weeklyProductionChart" style="max-width: 100%; height: 170px"></canvas>
+            {% else %}
+                <h6 class="card-title">Solar Weekly (Wk) Energy Production</h6>
+                <p>No data available</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="/js/chart.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Assuming PHP data passed here as JSON
+        const weeklyData = {{ weeklyProductionData|json_encode|raw }};
+
+        // Process the PHP data for Chart.js
+        const labels = weeklyData.map(item => item.week);
+        const dataPoints = weeklyData.map(item => item.energyProduced);
+
+        const ctx = document.getElementById('weeklyProductionChart').getContext('2d');
+
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: "Energy Produced (kWh)",
+                data: dataPoints,
+                backgroundColor: "#000000", // Black color for bars
+                borderColor: "#000000", // Black border color for consistency
+                borderWidth: 1
+            }]
+        };
+
+        const options = {
+            animation: false,
+            animations: {
+                colors: false,
+                x: false,
+                y: false
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: "Solar Weekly (Wk) Energy Production",
+                    color: "#000000" // Black title text
+                },
+                subtitle: {
+                    display: true,
+                    text: "Units: kWh",
+                    color: "#000000",
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: "#000000" // Black color for horizontal grid lines
+                    },
+                    ticks: {
+                        color: "#000000" // Black color for y-axis labels,
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: "#000000", // Black color for x-axis labels
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            }
+        };
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+        });
+    });
+</script>

@@ -8,7 +8,9 @@ use App\Entity\GoogleAccessToken;
 use App\Entity\Location;
 use App\Entity\SolarEdge;
 use App\Entity\Spotify;
+use App\Entity\Timezone;
 use App\Service\LayoutService;
+use App\Service\TimezoneService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class SettingsController extends AbstractController
 {
     #[Route('/', name: 'settings')]
-    public function settings(EntityManagerInterface $entityManager, LayoutService $componentService, LayoutConfigController $layoutConfigController): Response
+    public function settings(EntityManagerInterface $entityManager, LayoutService $componentService, LayoutConfigController $layoutConfigController, TimezoneService $timezoneService): Response
     {
         $solarEdgeSettings = $entityManager->getRepository(SolarEdge::class)->findBy([], ['id' => 'DESC'], 1);
         $emailSettings = $entityManager->getRepository(EmailSettings::class)->findBy([], ['id' => 'DESC'], 1);
@@ -26,9 +28,16 @@ class SettingsController extends AbstractController
         $spotifySettings = $entityManager->getRepository(Spotify::class)->findBy([], ['id' => 'DESC'], 1);
         $googleSettings = $entityManager->getRepository(GoogleAccessToken::class)->findBy([], ['id' => 'DESC'], 1);
         $countDown = $entityManager->getRepository(Countdown::class)->findAll();
+        $selectedTimezone = $entityManager->getRepository(Timezone::class)->find(1);
+
+        if ($selectedTimezone)
+            $selectedTimezone = $selectedTimezone->getTimezone();
 
         // Pobieramy dostępne komponenty
         $availableComponents = $componentService->getAvailableComponents();
+
+        // Pobieramy wszystkie strefy czasowe
+        $timeZones = $timezoneService->getTimezones();
 
         $layoutResponse = $layoutConfigController->getLayout($entityManager);
         $layoutJson = json_decode($layoutResponse->getContent(), true);
@@ -44,6 +53,8 @@ class SettingsController extends AbstractController
             'selectedComponents' => $layout,
             'replacementLayout' => $replacmentLayout,
             'countDown' => $countDown,
+            'timeZones' => $timeZones,
+            'selectedTimezone' => $selectedTimezone,
         ]);
     }
 }

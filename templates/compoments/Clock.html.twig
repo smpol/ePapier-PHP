@@ -1,0 +1,40 @@
+<div class="col-md-4">
+    <div class="card">
+        <div class="card-body text-center">
+            <h5 class="card-title">Current Time</h5>
+            <p style="font-size: 65px; margin: -20px;" class="card-text" id="current-time-only"></p>
+            <h5 class="card-text">Date</h5>
+            <p style="font-size: 35px; margin: -10px;" class="card-text" id="current-date-only"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const timeZoneOnly = '{{ timeZone }}';
+
+    function updateTimeAndDate() {
+        const now = new Date();
+
+        const timeOptions = {
+            timeZone: timeZoneOnly,
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        };
+        const timeString = now.toLocaleTimeString('en-GB', timeOptions);
+        document.getElementById('current-time-only').textContent = timeString;
+
+        const dateOptions = {
+            timeZone: timeZoneOnly,
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        };
+        const dateParts = new Intl.DateTimeFormat('en-GB', dateOptions).formatToParts(now);
+        const formattedDate = `${dateParts.find(p => p.type === 'day').value}.${dateParts.find(p => p.type === 'month').value}.${dateParts.find(p => p.type === 'year').value}`;
+        document.getElementById('current-date-only').textContent = formattedDate;
+    }
+
+    setInterval(updateTimeAndDate, 1000);
+    updateTimeAndDate();
+</script>

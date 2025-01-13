@@ -65,7 +65,7 @@
     <div class="row">
         {% for component in layout[:3] %}
             {% include 'compoments/' ~ component ~ '.html.twig' with {
-            'CurrentWeather': {'weather': weather},
+            'CurrentWeather': {'weather': weather, 'timeZone': timeZone},
             'Forecast': {'weather': weather},
             'Spotify': {'spotifyNowPlaying': spotifyNowPlaying},
             'GoogleCalendar': {'events': events},
@@ -73,7 +73,8 @@
             'SolarEdge': {'solarData': solarData},
             'SolarEdgeChart': {'weeklyProductionData': weeklyProductionData},
             'AirQuality': {'airQuality': airQuality},
-            'Countdown': {'countdown': countdown}
+            'Countdown': {'countdown': countdown},
+            'Clock': {'timeZone': timeZone}
             }[component] %}
         {% endfor %}
     </div>
@@ -82,7 +83,7 @@
     <div class="row">
         {% for component in layout[3:] %}
             {% include 'compoments/' ~ component ~ '.html.twig' with {
-            'CurrentWeather': {'weather': weather},
+            'CurrentWeather': {'weather': weather, 'timeZone': timeZone},
             'Forecast': {'weather': weather},
             'Spotify': {'spotifyNowPlaying': spotifyNowPlaying},
             'GoogleCalendar': {'events': events},
@@ -90,7 +91,8 @@
             'SolarEdge': {'solarData': solarData},
             'SolarEdgeChart': {'weeklyProductionData': weeklyProductionData},
             'AirQuality': {'airQuality': airQuality},
-            'Countdown': {'countdown': countdown}
+            'Countdown': {'countdown': countdown},
+            'Clock': {'timeZone': timeZone}
             }[component] %}
         {% endfor %}
     </div>

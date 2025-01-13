@@ -39,14 +39,13 @@ class WeatherService
             $airQuality = $response->toArray();
 
             return $airQuality;
-
-        } catch (TransportExceptionInterface|ServerExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface $e) {
+        } catch (TransportExceptionInterface | ServerExceptionInterface | ClientExceptionInterface | RedirectionExceptionInterface $e) {
             // Log the exception or handle it as needed, then return null
             return null;
         }
     }
 
-    public function getWeatherData(float $lat, float $lng): ?array
+    public function getWeatherData($lat, $lng): ?array
     {
         try {
             $response = $this->httpClient->request('GET', 'https://api.open-meteo.com/v1/forecast', [
@@ -74,8 +73,7 @@ class WeatherService
             $weatherData['forecast_data'] = $this->processForecast($weatherData['daily']);
 
             return $weatherData;
-
-        } catch (TransportExceptionInterface|ServerExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface $e) {
+        } catch (TransportExceptionInterface | ServerExceptionInterface | ClientExceptionInterface | RedirectionExceptionInterface $e) {
             // Log the exception or handle it as needed, then return null
             return null;
         }

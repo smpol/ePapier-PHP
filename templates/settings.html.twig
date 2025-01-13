@@ -125,6 +125,13 @@
                 >
                     Layout Settings
                 </a>
+                <a
+                        href="#"
+                        class="list-group-item list-group-item-action"
+                        onclick="showContent('timezone-settings')"
+                >
+                    Timezone Settings
+                </a>
             </div>
         </div>
         <div class="col-md-9">
@@ -348,13 +355,13 @@
                     </div>
                     <div class="card-body">
                         {% if not spotifySettings %}
-                            <form action="{{ path('spotify-login') }}">
+                            <form action="{{ path('spotify-login') }}" class="text-center">
                                 <button type="submit" class="btn btn-success">
                                     Connect to Spotify
                                 </button>
                             </form>
                         {% else %}
-                            <form action="{{ path('spotify-logout') }}">
+                            <form action="{{ path('spotify-logout') }}" class="text-center">
                                 <button type="submit" class="btn btn-danger">
                                     Disconnect from Spotify
                                 </button>
@@ -422,6 +429,34 @@
                         {% endif %}
                     </div>
                 </div>
+            </div>
+
+            <div id="timezone-settings" class="content-section" style="display: none">
+                <form method="POST" action="{{ path('set-timezone') }}">
+                    <div class="card shadow-lg">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h3>Select Timezone</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="timezone" class="form-label">Timezone</label>
+                                <select class="form-select" id="timezone" name="timezone" required>
+                                    <option value="">Select your timezone</option>
+                                    {% for timezone in timeZones %}
+                                        <option value="{{ timezone }}" {% if selectedTimezone == timezone %}selected{% endif %}>
+                                            {{ timezone|replace({'_': ' '}) }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i> Save Timezone
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
 
             <div id="layout-settings" class="content-section" style="display: none">

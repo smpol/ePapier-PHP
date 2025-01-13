@@ -1,0 +1,23 @@
+<div class="col-md-4">
+    <div class="card">
+        <div class="card-body text-center">
+            <h5 class="card-title">Solar Installation Statistics</h5>
+            {% if solarData %}
+                <p class="card-text" style="font-size: 13px;">
+                    {% if solarData.overview.currentPower.power < 1 %}
+                        Current Power: {{ (solarData.overview.currentPower.power * 1000) | round(2) }} W<br/>
+                    {% else %}
+                        Current Power: {{ solarData.overview.currentPower.power | round(2) }} kW<br/>
+                    {% endif %}
+                    Today's Energy: {{ solarData.overview.lastDayData.energy | round(2) }} kWh<br/>
+                    This Month's Energy: {{ solarData.overview.lastMonthData.energy | round(2) }} kWh<br/>
+                    This Year's Energy: {{ solarData.overview.lastYearData.energy | round(2) }} kWh<br/>
+                </p>
+            {% else %}
+                <p class="card-text">
+                    No data available.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
