@@ -34,7 +34,6 @@ class GoogleSyncController extends AbstractController
         }
 
         try {
-            // Exchange authorization code for access token
             $tokenResponse = $client->fetchAccessTokenWithAuthCode($authCode);
 
             if (isset($tokenResponse['error'])) {
@@ -64,15 +63,9 @@ class GoogleSyncController extends AbstractController
     public function saveSelectedCalendars(Request $request, EntityManagerInterface $em): Response
     {
         $selectedCalendars = $request->request->all('calendars');
-    
-        if (!is_array($selectedCalendars)) {
-            // Dodaj komunikat błędu i przekieruj, jeśli dane są nieprawidłowe
-            $this->addFlash('error', 'Invalid input for calendars.');
-            return $this->redirectToRoute('settings', ['tab' => 'google-settings']);
-        }
 
-
-        if (empty($selectedCalendars)) {
+        if (!is_array($selectedCalendars) || empty($selectedCalendars)) {
+            $this->addFlash('error', 'Invalid or empty calendar selection.');
             return $this->redirectToRoute('settings', ['tab' => 'google-settings']);
         }
 
@@ -85,7 +78,7 @@ class GoogleSyncController extends AbstractController
 
             $selectedCalendar = new SelectedCalendar();
             $selectedCalendar->setCalendarId((string)$calendarId);
-            $selectedCalendar->setCalendarName($calendarId);
+            $selectedCalendar->setCalendarName((string)$calendarId);
 
             $em->persist($selectedCalendar);
         }
@@ -117,10 +110,11 @@ class GoogleSyncController extends AbstractController
 
     public function getEvents(EntityManagerInterface $em): ?array
     {
-        $googleAccessToken = $em->getRepository(GoogleAccessToken::class)->findOneBy([], ['id' => 'DESC']);
+        $googleAccessToken = $em->getRepository(GoogleAccessToken::class)
+            ->findOneBy([], ['id' => 'DESC']);
 
-        if (!$googleAccessToken || !$googleAccessToken->getAccessToken()) {
-            error_log('Google access token not found');
+        if (!$googleAccessToken) {
+            error_log('No Google access token found');
             return null;
         }
 
@@ -130,22 +124,31 @@ class GoogleSyncController extends AbstractController
         if ($client->isAccessTokenExpired()) {
             $refreshToken = $googleAccessToken->getRefreshToken();
 
-            if ($refreshToken) {
-                try {
-                    $newAccessToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+            if (!$refreshToken) {
+                error_log('No refresh token available');
+                return null;
+            }
 
-                    if (isset($newAccessToken['access_token'])) {
-                        $this->storeAccessToken($em, $newAccessToken);
-                    } else {
-                        error_log("Failed to refresh access token");
-                        return null;
+            try {
+                $newAccessToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+                if (isset($newAccessToken['access_token'])) {
+                    $googleAccessToken->setAccessToken($newAccessToken['access_token']);
+                    $googleAccessToken->setExpiresAt(
+                        (new \DateTime())->add(
+                            new \DateInterval('PT' . ($newAccessToken['expires_in'] ?? 0) . 'S')
+                        )
+                    );
+                    if (isset($newAccessToken['refresh_token'])) {
+                        $googleAccessToken->setRefreshToken($newAccessToken['refresh_token']);
                     }
-                } catch (\Exception $e) {
-                    error_log("Error refreshing access token: " . $e->getMessage());
+                    $em->persist($googleAccessToken);
+                    $em->flush();
+                } else {
+                    error_log("Failed to refresh access token");
                     return null;
                 }
-            } else {
-                error_log("No refresh token available to refresh access token");
+            } catch (\Exception $e) {
+                error_log("Error refreshing access token: " . $e->getMessage());
                 return null;
             }
         }
@@ -194,24 +197,27 @@ class GoogleSyncController extends AbstractController
         $client->setClientId($_ENV['GOOGLE_CLIENT_ID']);
         $client->setClientSecret($_ENV['GOOGLE_CLIENT_SECRET']);
         $client->setRedirectUri(
-            ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_NAME'] === '127.0.0.1')
+            (in_array($_SERVER['SERVER_NAME'], ['localhost', '127.0.0.1']))
                 ? 'https://127.0.0.1:8000/google-callback'
                 : 'https://' . $_ENV['REDIRECT_URL'] . '/google-callback'
         );
         $client->addScope(GoogleCalendar::CALENDAR_READONLY);
         $client->setAccessType('offline');
         $client->setPrompt('consent');
-        $client->setHttpClient(new \GuzzleHttp\Client(['timeout' => 10])); // Timeout ustawiony na 10 sekund
+        $client->setHttpClient(new \GuzzleHttp\Client(['timeout' => 10]));
 
         return $client;
     }
 
     private function storeAccessToken(EntityManagerInterface $em, array $accessToken)
     {
-        $expiresAt = (new \DateTime())->add(new \DateInterval('PT' . ($accessToken['expires_in'] ?? 0) . 'S'));
         $googleAccessToken = new GoogleAccessToken();
         $googleAccessToken->setAccessToken($accessToken['access_token']);
-        $googleAccessToken->setExpiresAt($expiresAt);
+        $googleAccessToken->setExpiresAt(
+            (new \DateTime())->add(
+                new \DateInterval('PT' . ($accessToken['expires_in'] ?? 0) . 'S')
+            )
+        );
 
         if (isset($accessToken['refresh_token'])) {
             $googleAccessToken->setRefreshToken($accessToken['refresh_token']);
