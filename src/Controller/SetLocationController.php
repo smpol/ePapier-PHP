@@ -34,5 +34,4 @@ class SetLocationController extends AbstractController
 
         return $this->redirectToRoute('settings', ['tab' => 'location-settings']);
     }
-
 }

@@ -16,7 +16,6 @@ class GoogleAccessToken
     #[ORM\Column(type: 'text')]
     private string $accessToken;
 
-
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $refreshToken = null;
 
@@ -38,6 +37,7 @@ class GoogleAccessToken
     public function setAccessToken(string $accessToken): self
     {
         $this->accessToken = $accessToken;
+
         return $this;
     }
 
@@ -49,6 +49,7 @@ class GoogleAccessToken
     public function setRefreshToken(?string $refreshToken): self
     {
         $this->refreshToken = $refreshToken;
+
         return $this;
     }
 
@@ -60,6 +61,7 @@ class GoogleAccessToken
     public function setExpiresAt(?\DateTimeInterface $expiresAt): self
     {
         $this->expiresAt = $expiresAt;
+
         return $this;
     }
 }

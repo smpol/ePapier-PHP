@@ -31,6 +31,7 @@ class EmailController extends AbstractController
         }
 
         $entityManager->flush();
+
         return $this->redirectToRoute('settings', ['tab' => 'email-settings']);
     }
 
@@ -42,6 +43,7 @@ class EmailController extends AbstractController
             $entityManager->remove($emailSettings);
             $entityManager->flush();
         }
+
         return $this->redirectToRoute('settings', ['tab' => 'email-settings']);
     }
 
@@ -63,7 +65,7 @@ class EmailController extends AbstractController
                 'username' => $encryptionSerivce->decrypt($emailSettings->getImapUser()),
                 'password' => $encryptionSerivce->decrypt($emailSettings->getImapPassword()),
                 'validate_cert' => true,
-                'protocol' => 'imap'
+                'protocol' => 'imap',
             ]);
 
             try {
@@ -85,14 +87,14 @@ class EmailController extends AbstractController
                     $latestMail->date = $latestMailDate ? $latestMailDate->format('d-m-Y H:i') : null;
                 }
             } catch (\Exception $ex) {
-                $this->addFlash('error', 'Wystąpił błąd podczas pobierania e-maili: ' . $ex->getMessage());
+                $this->addFlash('error', 'Wystąpił błąd podczas pobierania e-maili: '.$ex->getMessage());
             }
         }
 
         return [
             'latestMail' => $latestMail,
             'emailConfigured' => $emailConfigured,
-            'unreadCount' => $unreadCount
+            'unreadCount' => $unreadCount,
         ];
     }
 }

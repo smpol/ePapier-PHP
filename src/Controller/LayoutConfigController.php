@@ -3,14 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Layout;
-use App\Service\LayoutService;
 use App\Service\UpdateScreenService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\SerializerInterface;
 
 class LayoutConfigController extends AbstractController
 {
@@ -46,7 +44,7 @@ class LayoutConfigController extends AbstractController
         return $this->json(['layout' => $layoutMainArray, 'replacment' => $layoutReplecmentArray]);
     }
 
-    #[Route("/set-layout", name: 'set-layout')]
+    #[Route('/set-layout', name: 'set-layout')]
     public function setLayout(EntityManagerInterface $entityManager)
     {
         // Pobieramy dane z formularza POST z użyciem $this->request
@@ -73,7 +71,6 @@ class LayoutConfigController extends AbstractController
         $layoutNew = [$window1, $window2, $window3, $window4, $window5, $window6];
         $replacmentNew = [$replacment1, $replacment2, $replacment3, $replacment4, $replacment5, $replacment6];
 
-
         // Usuwamy wszystko z tabeli
         $layoutRepository = $entityManager->getRepository(Layout::class);
         $allLayouts = $layoutRepository->findAll();
@@ -83,7 +80,7 @@ class LayoutConfigController extends AbstractController
         $entityManager->flush();
 
         // Zapisujemy nowe wartości
-        for ($i = 0; $i < count($layoutNew); $i++) {
+        for ($i = 0; $i < count($layoutNew); ++$i) {
             $layoutEntity = new Layout();
             $layoutEntity->setLayout($layoutNew[$i], $replacmentNew[$i]);
             $entityManager->persist($layoutEntity);

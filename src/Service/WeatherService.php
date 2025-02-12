@@ -18,65 +18,92 @@ class WeatherService
     }
 
     /**
-     * Pobiera dane pogodowe dla podanej lokalizacji.
+     * Pobiera dane dotyczące jakości powietrza.
+     *
+     * @param float $lat szerokość geograficzna
+     * @param float $lng długość geograficzna
+     *
+     * @return array|null dane dotyczące jakości powietrza lub null w przypadku błędu
      */
     public function getAirQuality(float $lat, float $lng): ?array
     {
         try {
-            $response = $this->httpClient->request('GET', 'https://air-quality-api.open-meteo.com/v1/air-quality', [
-                'query' => [
-                    'latitude' => $lat,
-                    'longitude' => $lng,
-                    'current' => 'european_aqi,pm10,pm2_5,carbon_monoxide',
+            $response = $this->httpClient->request(
+                'GET',
+                'https://air-quality-api.open-meteo.com/v1/air-quality',
+                [
+                    'query' => [
+                        'latitude' => $lat,
+                        'longitude' => $lng,
+                        'current' => 'european_aqi,pm10,pm2_5,carbon_monoxide',
+                    ],
                 ]
-            ]);
+            );
 
             // Check if the response status is 200, otherwise return null
-            if ($response->getStatusCode() !== 200) {
+            if (200 !== $response->getStatusCode()) {
                 return null;
             }
 
             $airQuality = $response->toArray();
 
             return $airQuality;
-        } catch (TransportExceptionInterface | ServerExceptionInterface | ClientExceptionInterface | RedirectionExceptionInterface $e) {
-            // Log the exception or handle it as needed, then return null
-            return null;
-        }
+        } catch (TransportExceptionInterface|
+            ServerExceptionInterface|
+            ClientExceptionInterface|
+            RedirectionExceptionInterface $e) {
+                // If expected error occurs return null
+                return null;
+            }
     }
 
     public function getWeatherData($lat, $lng): ?array
     {
         try {
-            $response = $this->httpClient->request('GET', 'https://api.open-meteo.com/v1/forecast', [
-                'query' => [
-                    'latitude' => $lat,
-                    'longitude' => $lng,
-                    'current_weather' => true,
-                    'daily' => ['temperature_2m_max', 'temperature_2m_min', 'weather_code', 'precipitation_probability_mean'],
-                    'timezone' => 'Europe/Warsaw',
-                    'forecast_days' => 3,
+            $response = $this->httpClient->request(
+                'GET',
+                'https://api.open-meteo.com/v1/forecast',
+                [
+                    'query' => [
+                        'latitude' => $lat,
+                        'longitude' => $lng,
+                        'current_weather' => true,
+                        'daily' => [
+                            'temperature_2m_max',
+                            'temperature_2m_min',
+                            'weather_code',
+                            'precipitation_probability_mean',
+                        ],
+                        'timezone' => 'Europe/Warsaw',
+                        'forecast_days' => 3,
+                    ],
                 ]
-            ]);
+            );
 
             // Check if the response status is 200, otherwise return null
-            if ($response->getStatusCode() !== 200) {
+            if (200 !== $response->getStatusCode()) {
                 return null;
             }
 
             $weatherData = $response->toArray();
 
             // Add weather icon based on the weather code
-            $weatherData['current_weather']['icon'] = $this->getWeatherIcon($weatherData['current_weather']['weathercode'], $weatherData['current_weather']['is_day']);
+            $weatherData['current_weather']['icon'] = $this->getWeatherIcon(
+                $weatherData['current_weather']['weathercode'],
+                $weatherData['current_weather']['is_day']
+            );
 
             // Process the forecast data
             $weatherData['forecast_data'] = $this->processForecast($weatherData['daily']);
 
             return $weatherData;
-        } catch (TransportExceptionInterface | ServerExceptionInterface | ClientExceptionInterface | RedirectionExceptionInterface $e) {
-            // Log the exception or handle it as needed, then return null
-            return null;
-        }
+        } catch (TransportExceptionInterface|
+            ServerExceptionInterface|
+            ClientExceptionInterface|
+            RedirectionExceptionInterface $e) {
+                // If expected error occurs return null
+                return null;
+            }
     }
 
     /**
@@ -211,7 +238,7 @@ class WeatherService
     private function processForecast(array $dailyData): array
     {
         $forecast = [];
-        for ($i = 1; $i < count($dailyData['time']); $i++) {
+        for ($i = 1; $i < count($dailyData['time']); ++$i) {
             $forecast[] = [
                 'label' => date('d M', strtotime($dailyData['time'][$i])), // Data
                 'temperature_max' => $dailyData['temperature_2m_max'][$i], // Maksymalna temperatura

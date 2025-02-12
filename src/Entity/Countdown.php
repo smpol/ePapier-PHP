@@ -56,5 +56,4 @@ class Countdown
 
         return $this;
     }
-
 }

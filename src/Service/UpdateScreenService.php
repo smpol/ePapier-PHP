@@ -18,7 +18,7 @@ class UpdateScreenService
     public function updateScreen(): void
     {
         try {
-            $response = $this->httpClient->request('GET', 'http://' . $_ENV['REDIRECT_URL'] . ':5002/updatescreen');
+            $response = $this->httpClient->request('GET', 'http://'.$_ENV['REDIRECT_URL'].':5002/updatescreen');
         } catch (TransportExceptionInterface $e) {
         }
     }

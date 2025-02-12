@@ -48,4 +48,3 @@ class Spotify
         return $this;
     }
 }
-

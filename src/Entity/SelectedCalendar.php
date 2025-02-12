@@ -34,6 +34,7 @@ class SelectedCalendar
     public function setCalendarId(string $calendarId): self
     {
         $this->calendarId = $calendarId;
+
         return $this;
     }
 
@@ -45,6 +46,7 @@ class SelectedCalendar
     public function setCalendarName(string $calendarName): self
     {
         $this->calendarName = $calendarName;
+
         return $this;
     }
 }

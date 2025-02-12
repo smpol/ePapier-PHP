@@ -39,7 +39,7 @@ class GoogleSyncController extends AbstractController
             if (isset($tokenResponse['error'])) {
                 return $this->json([
                     'error' => $tokenResponse['error'],
-                    'error_description' => $tokenResponse['error_description']
+                    'error_description' => $tokenResponse['error_description'],
                 ], 400);
             }
 
@@ -54,7 +54,7 @@ class GoogleSyncController extends AbstractController
         } catch (\Exception $e) {
             return $this->json([
                 'error' => 'Failed to process Google callback',
-                'error_description' => $e->getMessage()
+                'error_description' => $e->getMessage(),
             ], 500);
         }
     }
@@ -66,6 +66,7 @@ class GoogleSyncController extends AbstractController
 
         if (!is_array($selectedCalendars) || empty($selectedCalendars)) {
             $this->addFlash('error', 'Invalid or empty calendar selection.');
+
             return $this->redirectToRoute('settings', ['tab' => 'google-settings']);
         }
 
@@ -77,8 +78,8 @@ class GoogleSyncController extends AbstractController
             }
 
             $selectedCalendar = new SelectedCalendar();
-            $selectedCalendar->setCalendarId((string)$calendarId);
-            $selectedCalendar->setCalendarName((string)$calendarId);
+            $selectedCalendar->setCalendarId((string) $calendarId);
+            $selectedCalendar->setCalendarName((string) $calendarId);
 
             $em->persist($selectedCalendar);
         }
@@ -115,6 +116,7 @@ class GoogleSyncController extends AbstractController
 
         if (!$googleAccessToken) {
             error_log('No Google access token found');
+
             return null;
         }
 
@@ -126,6 +128,7 @@ class GoogleSyncController extends AbstractController
 
             if (!$refreshToken) {
                 error_log('No refresh token available');
+
                 return null;
             }
 
@@ -135,7 +138,7 @@ class GoogleSyncController extends AbstractController
                     $googleAccessToken->setAccessToken($newAccessToken['access_token']);
                     $googleAccessToken->setExpiresAt(
                         (new \DateTime())->add(
-                            new \DateInterval('PT' . ($newAccessToken['expires_in'] ?? 0) . 'S')
+                            new \DateInterval('PT'.($newAccessToken['expires_in'] ?? 0).'S')
                         )
                     );
                     if (isset($newAccessToken['refresh_token'])) {
@@ -144,11 +147,13 @@ class GoogleSyncController extends AbstractController
                     $em->persist($googleAccessToken);
                     $em->flush();
                 } else {
-                    error_log("Failed to refresh access token");
+                    error_log('Failed to refresh access token');
+
                     return null;
                 }
             } catch (\Exception $e) {
-                error_log("Error refreshing access token: " . $e->getMessage());
+                error_log('Error refreshing access token: '.$e->getMessage());
+
                 return null;
             }
         }
@@ -179,7 +184,7 @@ class GoogleSyncController extends AbstractController
                     ];
                 }
             } catch (\Exception $e) {
-                error_log("Failed to fetch events for calendar {$calendar->getCalendarId()}: " . $e->getMessage());
+                error_log("Failed to fetch events for calendar {$calendar->getCalendarId()}: ".$e->getMessage());
                 continue;
             }
         }
@@ -199,7 +204,7 @@ class GoogleSyncController extends AbstractController
         $client->setRedirectUri(
             (in_array($_SERVER['SERVER_NAME'], ['localhost', '127.0.0.1']))
                 ? 'https://127.0.0.1:8000/google-callback'
-                : 'https://' . $_ENV['REDIRECT_URL'] . '/google-callback'
+                : 'https://'.$_ENV['REDIRECT_URL'].'/google-callback'
         );
         $client->addScope(GoogleCalendar::CALENDAR_READONLY);
         $client->setAccessType('offline');
@@ -215,7 +220,7 @@ class GoogleSyncController extends AbstractController
         $googleAccessToken->setAccessToken($accessToken['access_token']);
         $googleAccessToken->setExpiresAt(
             (new \DateTime())->add(
-                new \DateInterval('PT' . ($accessToken['expires_in'] ?? 0) . 'S')
+                new \DateInterval('PT'.($accessToken['expires_in'] ?? 0).'S')
             )
         );
 

@@ -19,7 +19,7 @@ class SpotifyController extends AbstractController
         $client = HttpClient::create();
         $response = $client->request('POST', 'https://accounts.spotify.com/api/token', [
             'headers' => [
-                'Authorization' => 'Basic ' . base64_encode($_ENV['SPOTIFY_CLIENT_ID'] . ':' . $_ENV['SPOTIFY_CLIENT_SECRET']),
+                'Authorization' => 'Basic '.base64_encode($_ENV['SPOTIFY_CLIENT_ID'].':'.$_ENV['SPOTIFY_CLIENT_SECRET']),
                 'Content-Type' => 'application/x-www-form-urlencoded',
             ],
             'body' => [
@@ -28,7 +28,7 @@ class SpotifyController extends AbstractController
             ],
         ]);
 
-        if ($response->getStatusCode() === 200) {
+        if (200 === $response->getStatusCode()) {
             $data = $response->toArray();
             $newAccessToken = $data['access_token'];
             $spotify->setAccessToken($newAccessToken);
@@ -49,12 +49,12 @@ class SpotifyController extends AbstractController
         $authorizationScope = 'user-read-currently-playing';
         $authorizationUrl = 'https://accounts.spotify.com/authorize';
 
-        if ($_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['SERVER_NAME'] == '127.0.0.1') {
-            $serverAddress = 'https://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'];
+        if ('localhost' == $_SERVER['SERVER_NAME'] || '127.0.0.1' == $_SERVER['SERVER_NAME']) {
+            $serverAddress = 'https://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'];
         } else {
-            $serverAddress = 'https://' . $_ENV['REDIRECT_URL'];
+            $serverAddress = 'https://'.$_ENV['REDIRECT_URL'];
         }
-        $redirectUri = $serverAddress . '/spotify-callback';
+        $redirectUri = $serverAddress.'/spotify-callback';
 
         $query = http_build_query([
             'client_id' => $_ENV['SPOTIFY_CLIENT_ID'],
@@ -63,7 +63,7 @@ class SpotifyController extends AbstractController
             'scope' => $authorizationScope,
         ]);
 
-        return $this->redirect($authorizationUrl . '?' . $query);
+        return $this->redirect($authorizationUrl.'?'.$query);
     }
 
     #[Route('/spotify-callback', name: 'spotify-callback')]
@@ -72,17 +72,17 @@ class SpotifyController extends AbstractController
         $authorizationCode = $request->query->get('code');
 
         if ($authorizationCode) {
-            if ($_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['SERVER_NAME'] == '127.0.0.1') {
-                $serverAddress = 'https://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'];
+            if ('localhost' == $_SERVER['SERVER_NAME'] || '127.0.0.1' == $_SERVER['SERVER_NAME']) {
+                $serverAddress = 'https://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'];
             } else {
-                $serverAddress = 'https://' . $_ENV['REDIRECT_URL'];
+                $serverAddress = 'https://'.$_ENV['REDIRECT_URL'];
             }
-            $redirectUri = $serverAddress . '/spotify-callback';
+            $redirectUri = $serverAddress.'/spotify-callback';
 
             $client = HttpClient::create();
             $response = $client->request('POST', 'https://accounts.spotify.com/api/token', [
                 'headers' => [
-                    'Authorization' => 'Basic ' . base64_encode($_ENV['SPOTIFY_CLIENT_ID'] . ':' . $_ENV['SPOTIFY_CLIENT_SECRET']),
+                    'Authorization' => 'Basic '.base64_encode($_ENV['SPOTIFY_CLIENT_ID'].':'.$_ENV['SPOTIFY_CLIENT_SECRET']),
                     'Content-Type' => 'application/x-www-form-urlencoded',
                 ],
                 'body' => [
@@ -92,7 +92,7 @@ class SpotifyController extends AbstractController
                 ],
             ]);
 
-            if ($response->getStatusCode() === 200) {
+            if (200 === $response->getStatusCode()) {
                 $data = $response->toArray();
                 $accessToken = $data['access_token'];
                 $refreshToken = $data['refresh_token'];
@@ -141,16 +141,16 @@ class SpotifyController extends AbstractController
                 try {
                     $response = $client->request('GET', $apiUrl, [
                         'headers' => [
-                            'Authorization' => 'Bearer ' . $accessToken,
+                            'Authorization' => 'Bearer '.$accessToken,
                         ],
                     ]);
 
-                    if ($response->getStatusCode() === 401) {
+                    if (401 === $response->getStatusCode()) {
                         $accessToken = $this->refreshAccessToken($spotify, $entityManager);
                         if ($accessToken) {
                             $response = $client->request('GET', $apiUrl, [
                                 'headers' => [
-                                    'Authorization' => 'Bearer ' . $accessToken,
+                                    'Authorization' => 'Bearer '.$accessToken,
                                 ],
                             ]);
                         } else {
@@ -159,17 +159,19 @@ class SpotifyController extends AbstractController
                     }
                 } catch (TransportExceptionInterface $e) {
                     // Check if the error is related to DNS resolution or network issues
-                    if (strpos($e->getMessage(), 'Could not resolve host') !== false) {
+                    if (false !== strpos($e->getMessage(), 'Could not resolve host')) {
                         return ['error' => 'No internet connection.'];
                     }
+
                     return ['error' => 'Unable to fetch currently playing track. Please check your network connection.'];
                 }
 
-                if ($response->getStatusCode() === 200) {
+                if (200 === $response->getStatusCode()) {
                     $responseData = $response->toArray();
                     $title = $responseData['item']['name'];
-                    $artists = array_map(fn($artist) => $artist['name'], $responseData['item']['artists']);
+                    $artists = array_map(fn ($artist) => $artist['name'], $responseData['item']['artists']);
                     $album = $responseData['item']['album']['name'];
+
                     return [
                         'title' => $title,
                         'artists' => $artists,

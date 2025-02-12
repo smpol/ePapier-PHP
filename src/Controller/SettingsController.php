@@ -13,7 +13,6 @@ use App\Service\LayoutService;
 use App\Service\TimezoneService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -30,8 +29,9 @@ class SettingsController extends AbstractController
         $countDown = $entityManager->getRepository(Countdown::class)->findAll();
         $selectedTimezone = $entityManager->getRepository(Timezone::class)->find(1);
 
-        if ($selectedTimezone)
+        if ($selectedTimezone) {
             $selectedTimezone = $selectedTimezone->getTimezone();
+        }
 
         // Pobieramy dostępne komponenty
         $availableComponents = $componentService->getAvailableComponents();
@@ -43,6 +43,7 @@ class SettingsController extends AbstractController
         $layoutJson = json_decode($layoutResponse->getContent(), true);
         $layout = $layoutJson['layout'];
         $replacmentLayout = $layoutJson['replacment'];
+
         return $this->render('settings.html.twig', [
             'solarEdgeSettings' => $solarEdgeSettings,
             'emailSettings' => $emailSettings,

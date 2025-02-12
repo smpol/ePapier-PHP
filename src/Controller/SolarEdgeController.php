@@ -20,6 +20,7 @@ class SolarEdgeController extends AbstractController
 
         if (!$apiKey || !$siteId) {
             $this->addFlash('error', 'API Key and Site ID are required.');
+
             return $this->redirectToRoute('settings', ['tab' => 'solar-settings']);
         }
 

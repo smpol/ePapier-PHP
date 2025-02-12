@@ -24,17 +24,17 @@ class ScreenController extends AbstractController
      */
     #[Route('/screen', name: 'screen')]
     public function screen(
-        EntityManagerInterface   $entityManager,
-        WeatherService           $weatherService,
-        SolarEdgeService         $solarEdgeService,
-        CacheInterface           $cache,
-        SpotifyController        $spotifyController,
+        EntityManagerInterface $entityManager,
+        WeatherService $weatherService,
+        SolarEdgeService $solarEdgeService,
+        CacheInterface $cache,
+        SpotifyController $spotifyController,
         OpenSSLEncryptionSerivce $encryptionSerivce,
-        LayoutConfigController   $layoutConfigController,
-        EmailController          $emailController,
-        GoogleSyncController     $googleSyncController,
-        SetTimezoneController    $setTimezoneController,
-        Request                  $request,
+        LayoutConfigController $layoutConfigController,
+        EmailController $emailController,
+        GoogleSyncController $googleSyncController,
+        SetTimezoneController $setTimezoneController,
+        Request $request,
     ): Response {
         $layoutResponse = $layoutConfigController->getLayout($entityManager);
         $layoutJson = json_decode($layoutResponse->getContent(), true);
@@ -42,7 +42,7 @@ class ScreenController extends AbstractController
         $replacmentLayout = $layoutJson['replacment'];
         if ($request->query->get('second')) {
             foreach ($layout as $key => $value) {
-                if ($replacmentLayout[$key] != null) {
+                if (null != $replacmentLayout[$key]) {
                     $layout[$key] = $replacmentLayout[$key];
                 }
             }
@@ -53,72 +53,93 @@ class ScreenController extends AbstractController
         $weatherData = $cache->get('weather_data', function (ItemInterface $item) use ($weatherService, $location, $cache) {
             if ($location) {
                 $item->expiresAfter(60);
+
                 return $weatherService->getWeatherData($location->getLat(), $location->getLeng());
             } else {
-                if (isset($cache)) $cache->delete('weather_data');
+                if (isset($cache)) {
+                    $cache->delete('weather_data');
+                }
                 $item->expiresAfter(0);
             }
+
             return null;
         });
 
         $airQuality = $cache->get('air_quality', function (ItemInterface $item) use ($weatherService, $location, $cache) {
             if ($location) {
                 $item->expiresAfter(60);
+
                 return $weatherService->getAirQuality($location->getLat(), $location->getLeng());
             } else {
-                if (isset($cache)) $cache->delete('air_quality');
+                if (isset($cache)) {
+                    $cache->delete('air_quality');
+                }
                 $item->expiresAfter(0);
             }
+
             return null;
         });
 
         $solarEdgeData = $cache->get('solar_edge_data', function (ItemInterface $item) use ($solarEdgeService, $entityManager, $cache) {
             $data = $solarEdgeService->getSolarEdgeData($entityManager);
             if (!$data) {
-                if (isset($cache)) $cache->delete('solar_edge_data');
+                if (isset($cache)) {
+                    $cache->delete('solar_edge_data');
+                }
                 $item->expiresAfter(0);
             } else {
                 $item->expiresAfter(60);
             }
+
             return $data;
         });
 
         $getMails = $cache->get('emails_data', function (ItemInterface $item) use ($emailController, $entityManager, $encryptionSerivce, $cache) {
             $data = $emailController->getEmails($entityManager, $encryptionSerivce);
             if (!$data) {
-                if (isset($cache)) $cache->delete('emails_data');
+                if (isset($cache)) {
+                    $cache->delete('emails_data');
+                }
                 $item->expiresAfter(0);
             } else {
                 $item->expiresAfter(20);
             }
+
             return $data;
         });
 
         $getEvents = $cache->get('events_data', function (ItemInterface $item) use ($googleSyncController, $entityManager, $cache) {
             $data = $googleSyncController->getEvents($entityManager);
             if (!$data) {
-                if (isset($cache)) $cache->delete('events_data');
+                if (isset($cache)) {
+                    $cache->delete('events_data');
+                }
                 $item->expiresAfter(0);
             } else {
                 $item->expiresAfter(20);
             }
+
             return $data;
         });
 
         $spotify = $cache->get('spotify_now_playing', function (ItemInterface $item) use ($spotifyController, $entityManager) {
             $data = $spotifyController->getPlayingNow($entityManager);
             $item->expiresAfter(10);
+
             return $data;
         });
 
         $weeklyProductionData = $cache->get('solar_edge_weekly_data', function (ItemInterface $item) use ($solarEdgeService, $entityManager, $cache) {
             $data = $solarEdgeService->getSolarEdgeDataWeekly($entityManager);
             if (!$data) {
-                if (isset($cache)) $cache->delete('solar_edge_weekly_data');
+                if (isset($cache)) {
+                    $cache->delete('solar_edge_weekly_data');
+                }
                 $item->expiresAfter(0);
             } else {
                 $item->expiresAfter(3600);
             }
+
             return $data;
         });
 
@@ -135,7 +156,8 @@ class ScreenController extends AbstractController
         }
 
         if (!$location && !$solarEdgeData && !$latestMail && !$spotify && !$getEvents) {
-            $url = "https://" . ($request->query->get('ip') ?? $_SERVER['SERVER_NAME']) . "/";
+            $url = 'https://'.($request->query->get('ip') ?? $_SERVER['SERVER_NAME']).'/';
+
             return $this->render('notConfigured.html.twig', ['settings_url' => $url]);
         } else {
             return $this->render('index.html.twig', [
@@ -146,7 +168,7 @@ class ScreenController extends AbstractController
                 'latestMail' => $latestMail ? [
                     'subject' => $latestMail->subject,
                     'from' => $latestMail->from,
-                    'date' => $latestMail->date
+                    'date' => $latestMail->date,
                 ] : null,
                 'emailConfigured' => $emailConfigured,
                 'spotifyNowPlaying' => $spotify,

@@ -2,9 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Location;
 use App\Entity\Timezone;
-use App\Service\UpdateScreenService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,5 +26,4 @@ class SetTimezoneController extends AbstractController
 
         return $this->redirectToRoute('settings', ['tab' => 'timezone-settings']);
     }
-
 }
