@@ -54,7 +54,7 @@ class ScreenController extends AbstractController
             if ($location) {
                 $item->expiresAfter(60);
 
-                return $weatherService->getWeatherData($location->getLat(), $location->getLeng());
+                return $weatherService->getWeatherData($location->getLat(), $location->getLong());
             } else {
                 if (isset($cache)) {
                     $cache->delete('weather_data');
@@ -69,7 +69,7 @@ class ScreenController extends AbstractController
             if ($location) {
                 $item->expiresAfter(60);
 
-                return $weatherService->getAirQuality($location->getLat(), $location->getLeng());
+                return $weatherService->getAirQuality($location->getLat(), $location->getLong());
             } else {
                 if (isset($cache)) {
                     $cache->delete('air_quality');
