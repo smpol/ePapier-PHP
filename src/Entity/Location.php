@@ -17,7 +17,7 @@ class Location
     private ?string $lat = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $long = null;
+    private ?string $lon = null;
 
     public function getId(): ?int
     {
@@ -36,14 +36,14 @@ class Location
         return $this;
     }
 
-    public function getLong(): ?string
+    public function getLon(): ?string
     {
-        return $this->long;
+        return $this->lon;
     }
 
-    public function setLong(?string $long): static
+    public function setLon(?string $lon): static
     {
-        $this->long = $long;
+        $this->lon = $lon;
 
         return $this;
     }

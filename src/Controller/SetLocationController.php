@@ -21,11 +21,11 @@ class SetLocationController extends AbstractController
         if (!$location) {
             $newLocation = new Location();
             $newLocation->setLat($lat);
-            $newLocation->setLong($lng);
+            $newLocation->setLon($lng);
             $entityManager->persist($newLocation);
         } else {
             $location->setLat($lat);
-            $location->setLong($lng);
+            $location->setLon($lng);
         }
         $entityManager->flush();
 
