@@ -17,27 +17,31 @@ class SpotifyController extends AbstractController
     private function refreshAccessToken(Spotify $spotify, EntityManagerInterface $entityManager): ?string
     {
         $client = HttpClient::create();
-        $response = $client->request('POST', 'https://accounts.spotify.com/api/token', [
-            'headers' => [
-                'Authorization' => 'Basic '.base64_encode($_ENV['SPOTIFY_CLIENT_ID'].':'.$_ENV['SPOTIFY_CLIENT_SECRET']),
-                'Content-Type' => 'application/x-www-form-urlencoded',
-            ],
-            'body' => [
-                'grant_type' => 'refresh_token',
-                'refresh_token' => $spotify->getRefreshToken(),
-            ],
-        ]);
+        try {
+            $response = $client->request('POST', 'https://accounts.spotify.com/api/token', [
+                'headers' => [
+                    'Authorization' => 'Basic ' . base64_encode($_ENV['SPOTIFY_CLIENT_ID'] . ':' . $_ENV['SPOTIFY_CLIENT_SECRET']),
+                    'Content-Type' => 'application/x-www-form-urlencoded',
+                ],
+                'body' => [
+                    'grant_type' => 'refresh_token',
+                    'refresh_token' => $spotify->getRefreshToken(),
+                ],
+            ]);
 
-        if (200 === $response->getStatusCode()) {
-            $data = $response->toArray();
-            $newAccessToken = $data['access_token'];
-            $spotify->setAccessToken($newAccessToken);
+            if (200 === $response->getStatusCode()) {
+                $data = $response->toArray();
+                $newAccessToken = $data['access_token'];
+                $spotify->setAccessToken($newAccessToken);
 
-            // Zapisz nowy token w bazie danych
-            $entityManager->persist($spotify);
-            $entityManager->flush();
+                // Zapisz nowy token w bazie danych
+                $entityManager->persist($spotify);
+                $entityManager->flush();
 
-            return $newAccessToken;
+                return $newAccessToken;
+            }
+        } catch (\Exception $e) {
+            // Do nothing
         }
 
         return null;
@@ -50,11 +54,11 @@ class SpotifyController extends AbstractController
         $authorizationUrl = 'https://accounts.spotify.com/authorize';
 
         if ('localhost' == $_SERVER['SERVER_NAME'] || '127.0.0.1' == $_SERVER['SERVER_NAME']) {
-            $serverAddress = 'https://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'];
+            $serverAddress = 'https://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'];
         } else {
-            $serverAddress = 'https://'.$_ENV['REDIRECT_URL'];
+            $serverAddress = 'https://' . $_ENV['REDIRECT_URL'];
         }
-        $redirectUri = $serverAddress.'/spotify-callback';
+        $redirectUri = $serverAddress . '/spotify-callback';
 
         $query = http_build_query([
             'client_id' => $_ENV['SPOTIFY_CLIENT_ID'],
@@ -63,7 +67,7 @@ class SpotifyController extends AbstractController
             'scope' => $authorizationScope,
         ]);
 
-        return $this->redirect($authorizationUrl.'?'.$query);
+        return $this->redirect($authorizationUrl . '?' . $query);
     }
 
     #[Route('/spotify-callback', name: 'spotify-callback')]
@@ -73,42 +77,46 @@ class SpotifyController extends AbstractController
 
         if ($authorizationCode) {
             if ('localhost' == $_SERVER['SERVER_NAME'] || '127.0.0.1' == $_SERVER['SERVER_NAME']) {
-                $serverAddress = 'https://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'];
+                $serverAddress = 'https://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'];
             } else {
-                $serverAddress = 'https://'.$_ENV['REDIRECT_URL'];
+                $serverAddress = 'https://' . $_ENV['REDIRECT_URL'];
             }
-            $redirectUri = $serverAddress.'/spotify-callback';
+            $redirectUri = $serverAddress . '/spotify-callback';
 
             $client = HttpClient::create();
-            $response = $client->request('POST', 'https://accounts.spotify.com/api/token', [
-                'headers' => [
-                    'Authorization' => 'Basic '.base64_encode($_ENV['SPOTIFY_CLIENT_ID'].':'.$_ENV['SPOTIFY_CLIENT_SECRET']),
-                    'Content-Type' => 'application/x-www-form-urlencoded',
-                ],
-                'body' => [
-                    'grant_type' => 'authorization_code',
-                    'code' => $authorizationCode,
-                    'redirect_uri' => $redirectUri,
-                ],
-            ]);
+            try {
+                $response = $client->request('POST', 'https://accounts.spotify.com/api/token', [
+                    'headers' => [
+                        'Authorization' => 'Basic ' . base64_encode($_ENV['SPOTIFY_CLIENT_ID'] . ':' . $_ENV['SPOTIFY_CLIENT_SECRET']),
+                        'Content-Type' => 'application/x-www-form-urlencoded',
+                    ],
+                    'body' => [
+                        'grant_type' => 'authorization_code',
+                        'code' => $authorizationCode,
+                        'redirect_uri' => $redirectUri,
+                    ],
+                ]);
 
-            if (200 === $response->getStatusCode()) {
-                $data = $response->toArray();
-                $accessToken = $data['access_token'];
-                $refreshToken = $data['refresh_token'];
+                if (200 === $response->getStatusCode()) {
+                    $data = $response->toArray();
+                    $accessToken = $data['access_token'];
+                    $refreshToken = $data['refresh_token'];
 
-                $allSettings = $entityManager->getRepository(Spotify::class)->findAll();
-                foreach ($allSettings as $setting) {
-                    $entityManager->remove($setting);
+                    $allSettings = $entityManager->getRepository(Spotify::class)->findAll();
+                    foreach ($allSettings as $setting) {
+                        $entityManager->remove($setting);
+                    }
+                    $entityManager->flush();
+
+                    $spotifySettings = new Spotify();
+                    $spotifySettings->setAccessToken($accessToken);
+                    $spotifySettings->setRefreshToken($refreshToken);
+
+                    $entityManager->persist($spotifySettings);
+                    $entityManager->flush();
                 }
-                $entityManager->flush();
-
-                $spotifySettings = new Spotify();
-                $spotifySettings->setAccessToken($accessToken);
-                $spotifySettings->setRefreshToken($refreshToken);
-
-                $entityManager->persist($spotifySettings);
-                $entityManager->flush();
+            } catch (\Exception $e) {
+                // Do nothing
             }
         }
 
@@ -141,7 +149,7 @@ class SpotifyController extends AbstractController
                 try {
                     $response = $client->request('GET', $apiUrl, [
                         'headers' => [
-                            'Authorization' => 'Bearer '.$accessToken,
+                            'Authorization' => 'Bearer ' . $accessToken,
                         ],
                     ]);
 
@@ -150,7 +158,7 @@ class SpotifyController extends AbstractController
                         if ($accessToken) {
                             $response = $client->request('GET', $apiUrl, [
                                 'headers' => [
-                                    'Authorization' => 'Bearer '.$accessToken,
+                                    'Authorization' => 'Bearer ' . $accessToken,
                                 ],
                             ]);
                         } else {
@@ -169,7 +177,7 @@ class SpotifyController extends AbstractController
                 if (200 === $response->getStatusCode()) {
                     $responseData = $response->toArray();
                     $title = $responseData['item']['name'];
-                    $artists = array_map(fn ($artist) => $artist['name'], $responseData['item']['artists']);
+                    $artists = array_map(fn($artist) => $artist['name'], $responseData['item']['artists']);
                     $album = $responseData['item']['album']['name'];
 
                     return [
