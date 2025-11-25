@@ -5,32 +5,56 @@ namespace App\Controller;
 use App\Entity\Location;
 use App\Service\UpdateScreenService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
 class SetLocationController extends AbstractController
 {
-    #[Route('/set-location', name: 'set-location')]
-    public function setLocation(Request $request, EntityManagerInterface $entityManager)
+    private EntityManagerInterface $em;
+    private UpdateScreenService $updateScreenService;
+    private LoggerInterface $logger;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        UpdateScreenService $updateScreenService,
+        LoggerInterface $logger
+    ) {
+        $this->em = $em;
+        $this->updateScreenService = $updateScreenService;
+        $this->logger = $logger;
+    }
+
+    #[Route('/set-location', name: 'set-location', methods: ['POST'])]
+    public function setLocation(Request $request): Response
     {
         $lat = $request->request->get('latitude');
-        $lng = $request->request->get('longitude');
+        $lon = $request->request->get('longitude');
 
-        $location = $entityManager->getRepository(Location::class)->find(1);
-        if (!$location) {
-            $newLocation = new Location();
-            $newLocation->setLat($lat);
-            $newLocation->setLon($lng);
-            $entityManager->persist($newLocation);
-        } else {
-            $location->setLat($lat);
-            $location->setLon($lng);
+        if (empty($lat) || empty($lon)) {
+            $this->addFlash('error', 'Latitude and longitude are required.');
+
+            return $this->redirectToRoute('settings', ['tab' => 'location-settings']);
         }
-        $entityManager->flush();
 
-        $screen = new UpdateScreenService();
-        $screen->updateScreen();
+        try {
+            $location = $this->em->getRepository(Location::class)->find(1) ?? new Location();
+            $location->setLat($lat);
+            $location->setLon($lon);
+
+            if (!$location->getId()) {
+                $this->em->persist($location);
+            }
+
+            $this->em->flush();
+            $this->updateScreenService->updateScreen();
+            $this->addFlash('success', 'Location saved successfully.');
+        } catch (\Exception $e) {
+            $this->logger->error('Error saving location: '.$e->getMessage());
+            $this->addFlash('error', 'Failed to save location.');
+        }
 
         return $this->redirectToRoute('settings', ['tab' => 'location-settings']);
     }

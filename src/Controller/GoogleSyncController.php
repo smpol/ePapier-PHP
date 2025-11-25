@@ -2,11 +2,11 @@
 
 namespace App\Controller;
 
-use App\Entity\GoogleAccessToken;
 use App\Entity\SelectedCalendar;
+use App\Service\GoogleCalendarService;
+use App\Service\GoogleClientService;
 use Doctrine\ORM\EntityManagerInterface;
-use Google\Client as GoogleClient;
-use Google\Service\Calendar as GoogleCalendar;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,53 +14,70 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class GoogleSyncController extends AbstractController
 {
+    private GoogleClientService $googleClientService;
+    private GoogleCalendarService $googleCalendarService;
+    private EntityManagerInterface $em;
+    private LoggerInterface $logger;
+
+    public function __construct(
+        GoogleClientService $googleClientService,
+        GoogleCalendarService $googleCalendarService,
+        EntityManagerInterface $em,
+        LoggerInterface $logger
+    ) {
+        $this->googleClientService = $googleClientService;
+        $this->googleCalendarService = $googleCalendarService;
+        $this->em = $em;
+        $this->logger = $logger;
+    }
+
     #[Route('/google-login', name: 'google-login')]
     public function googleLogin(): Response
     {
-        $client = $this->initializeGoogleClient();
-        $authUrl = $client->createAuthUrl();
+        $authUrl = $this->googleClientService->createAuthUrl();
 
         return $this->redirect($authUrl);
     }
 
     #[Route('/google-callback', name: 'google-callback')]
-    public function googleCallback(Request $request, EntityManagerInterface $em): Response
+    public function googleCallback(Request $request): Response
     {
-        $client = $this->initializeGoogleClient();
         $authCode = $request->query->get('code');
 
         if (!$authCode) {
-            return $this->json(['error' => 'Authorization code not found'], 400);
+            $this->logger->error('Authorization code not found');
+            $this->addFlash('error', 'Authorization code not found.');
+
+            return $this->redirectToRoute('settings', ['tab' => 'google-settings']);
         }
 
         try {
-            $tokenResponse = $client->fetchAccessTokenWithAuthCode($authCode);
+            $tokenResponse = $this->googleClientService->fetchAccessTokenWithAuthCode($authCode);
 
             if (isset($tokenResponse['error'])) {
-                return $this->json([
-                    'error' => $tokenResponse['error'],
-                    'error_description' => $tokenResponse['error_description'],
-                ], 400);
+                $this->logger->error('Google API error: '.$tokenResponse['error_description']);
+                $this->addFlash('error', 'Google API error: '.$tokenResponse['error_description']);
+
+                return $this->redirectToRoute('settings', ['tab' => 'google-settings']);
             }
 
-            $this->storeAccessToken($em, $client->getAccessToken());
+            $this->googleClientService->storeAccessToken($tokenResponse);
 
-            $service = new GoogleCalendar($client);
-            $calendarList = $service->calendarList->listCalendarList();
+            $calendars = $this->googleCalendarService->getCalendarList();
 
             return $this->render('select_calendars.html.twig', [
-                'calendars' => $calendarList->getItems(),
+                'calendars' => $calendars,
             ]);
         } catch (\Exception $e) {
-            return $this->json([
-                'error' => 'Failed to process Google callback',
-                'error_description' => $e->getMessage(),
-            ], 500);
+            $this->logger->error('Failed to process Google callback: '.$e->getMessage());
+            $this->addFlash('error', 'Failed to process Google callback.');
+
+            return $this->redirectToRoute('settings', ['tab' => 'google-settings']);
         }
     }
 
     #[Route('/google-save-calendar', name: 'google-save-calendar', methods: ['POST'])]
-    public function saveSelectedCalendars(Request $request, EntityManagerInterface $em): Response
+    public function saveSelectedCalendars(Request $request): Response
     {
         $selectedCalendars = $request->request->all('calendars');
 
@@ -70,7 +87,7 @@ class GoogleSyncController extends AbstractController
             return $this->redirectToRoute('settings', ['tab' => 'google-settings']);
         }
 
-        $em->createQuery('DELETE FROM App\Entity\SelectedCalendar')->execute();
+        $this->em->createQuery('DELETE FROM App\Entity\SelectedCalendar')->execute();
 
         foreach ($selectedCalendars as $calendarId) {
             if (!is_scalar($calendarId)) {
@@ -81,162 +98,44 @@ class GoogleSyncController extends AbstractController
             $selectedCalendar->setCalendarId((string) $calendarId);
             $selectedCalendar->setCalendarName((string) $calendarId);
 
-            $em->persist($selectedCalendar);
+            $this->em->persist($selectedCalendar);
         }
 
-        $em->flush();
+        $this->em->flush();
+        $this->addFlash('success', 'Calendar selection saved.');
 
         return $this->redirectToRoute('settings', ['tab' => 'google-settings']);
     }
 
     #[Route('/google-remove-calendar', name: 'google-remove-calendar')]
-    public function removeGoogle(EntityManagerInterface $entityManager): Response
+    public function removeGoogle(): Response
     {
-        $googleAccessTokens = $entityManager->getRepository(GoogleAccessToken::class)->findAll();
-        $selectedCalendars = $entityManager->getRepository(SelectedCalendar::class)->findAll();
+        try {
+            $this->googleClientService->revokeToken();
 
-        foreach ($googleAccessTokens as $token) {
-            $this->revokeToken($token->getAccessToken());
-            $entityManager->remove($token);
+            $selectedCalendars = $this->em->getRepository(SelectedCalendar::class)->findAll();
+            foreach ($selectedCalendars as $calendar) {
+                $this->em->remove($calendar);
+            }
+
+            $this->em->flush();
+            $this->addFlash('success', 'Google account disconnected.');
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to remove Google integration: '.$e->getMessage());
+            $this->addFlash('error', 'Failed to remove Google integration.');
         }
-
-        foreach ($selectedCalendars as $calendar) {
-            $entityManager->remove($calendar);
-        }
-
-        $entityManager->flush();
 
         return $this->redirectToRoute('settings', ['tab' => 'google-settings']);
     }
 
-    public function getEvents(EntityManagerInterface $em): ?array
+    public function getEvents(): ?array
     {
-        $googleAccessToken = $em->getRepository(GoogleAccessToken::class)
-            ->findOneBy([], ['id' => 'DESC']);
-
-        if (!$googleAccessToken) {
-            error_log('No Google access token found');
+        try {
+            return $this->googleCalendarService->getEvents();
+        } catch (\Exception $e) {
+            $this->logger->error('Error in getEvents: '.$e->getMessage());
 
             return null;
-        }
-
-        $client = $this->initializeGoogleClient();
-        $client->setAccessToken($googleAccessToken->getAccessToken());
-
-        if ($client->isAccessTokenExpired()) {
-            $refreshToken = $googleAccessToken->getRefreshToken();
-
-            if (!$refreshToken) {
-                error_log('No refresh token available');
-
-                return null;
-            }
-
-            try {
-                $newAccessToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
-                if (isset($newAccessToken['access_token'])) {
-                    $googleAccessToken->setAccessToken($newAccessToken['access_token']);
-                    $googleAccessToken->setExpiresAt(
-                        (new \DateTime())->add(
-                            new \DateInterval('PT'.($newAccessToken['expires_in'] ?? 0).'S')
-                        )
-                    );
-                    if (isset($newAccessToken['refresh_token'])) {
-                        $googleAccessToken->setRefreshToken($newAccessToken['refresh_token']);
-                    }
-                    $em->persist($googleAccessToken);
-                    $em->flush();
-                } else {
-                    error_log('Failed to refresh access token');
-
-                    return null;
-                }
-            } catch (\Exception $e) {
-                error_log('Error refreshing access token: '.$e->getMessage());
-
-                return null;
-            }
-        }
-
-        $service = new GoogleCalendar($client);
-        $selectedCalendars = $em->getRepository(SelectedCalendar::class)->findAll();
-
-        $events = [];
-        $now = new \DateTime();
-        $sixtyDaysLater = (new \DateTime())->add(new \DateInterval('P60D'));
-        $nowFormatted = $now->format(\DateTimeInterface::RFC3339);
-        $sixtyDaysLaterFormatted = $sixtyDaysLater->format(\DateTimeInterface::RFC3339);
-
-        foreach ($selectedCalendars as $calendar) {
-            try {
-                $eventList = $service->events->listEvents($calendar->getCalendarId(), [
-                    'timeMin' => $nowFormatted,
-                    'timeMax' => $sixtyDaysLaterFormatted,
-                    'singleEvents' => true,
-                    'orderBy' => 'startTime',
-                ]);
-
-                foreach ($eventList->getItems() as $event) {
-                    $events[] = [
-                        'summary' => $event->getSummary(),
-                        'start' => $event->start->dateTime ?? $event->start->date,
-                        'location' => $event->getLocation() ?? '',
-                    ];
-                }
-            } catch (\Exception $e) {
-                error_log("Failed to fetch events for calendar {$calendar->getCalendarId()}: ".$e->getMessage());
-                continue;
-            }
-        }
-
-        usort($events, function ($a, $b) {
-            return new \DateTime($a['start']) <=> new \DateTime($b['start']);
-        });
-
-        return array_slice($events, 0, 2);
-    }
-
-    private function initializeGoogleClient(): GoogleClient
-    {
-        $client = new GoogleClient();
-        $client->setClientId($_ENV['GOOGLE_CLIENT_ID']);
-        $client->setClientSecret($_ENV['GOOGLE_CLIENT_SECRET']);
-        $client->setRedirectUri(
-            (in_array($_SERVER['SERVER_NAME'], ['localhost', '127.0.0.1']))
-                ? 'https://127.0.0.1:8000/google-callback'
-                : 'https://'.$_ENV['REDIRECT_URL'].'/google-callback'
-        );
-        $client->addScope(GoogleCalendar::CALENDAR_READONLY);
-        $client->setAccessType('offline');
-        $client->setPrompt('consent');
-        $client->setHttpClient(new \GuzzleHttp\Client(['timeout' => 10]));
-
-        return $client;
-    }
-
-    private function storeAccessToken(EntityManagerInterface $em, array $accessToken)
-    {
-        $googleAccessToken = new GoogleAccessToken();
-        $googleAccessToken->setAccessToken($accessToken['access_token']);
-        $googleAccessToken->setExpiresAt(
-            (new \DateTime())->add(
-                new \DateInterval('PT'.($accessToken['expires_in'] ?? 0).'S')
-            )
-        );
-
-        if (isset($accessToken['refresh_token'])) {
-            $googleAccessToken->setRefreshToken($accessToken['refresh_token']);
-        }
-
-        $em->persist($googleAccessToken);
-        $em->flush();
-    }
-
-    private function revokeToken(?string $token)
-    {
-        if ($token) {
-            $client = new GoogleClient();
-            $client->revokeToken($token);
         }
     }
 }

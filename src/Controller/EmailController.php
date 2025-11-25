@@ -3,98 +3,89 @@
 namespace App\Controller;
 
 use App\Entity\EmailSettings;
+use App\Service\EmailService;
 use App\Service\OpenSSLEncryptionSerivce;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Webklex\PHPIMAP\ClientManager;
 
 class EmailController extends AbstractController
 {
-    #[Route('/email-settings', name: 'email')]
-    public function setEmailDetails(Request $request, EntityManagerInterface $entityManager, OpenSSLEncryptionSerivce $encryptionSerivce)
-    {
-        $imapServer = $request->request->get('imap_server');
-        $imapPort = $request->request->get('imap_port');
-        $imapUsername = $request->request->get('imap_username');
-        $imapPassword = $request->request->get('imap_password');
+    private EntityManagerInterface $em;
+    private OpenSSLEncryptionSerivce $encryptionService;
+    private EmailService $emailService;
+    private LoggerInterface $logger;
 
-        $emailSettings = $entityManager->getRepository(EmailSettings::class)->find(1) ?? new EmailSettings();
-        $emailSettings->setImapServer($encryptionSerivce->encrypt($imapServer));
-        $emailSettings->setImapPort($imapPort);
-        $emailSettings->setImapUser($encryptionSerivce->encrypt($imapUsername));
-        $emailSettings->setImapPassword($encryptionSerivce->encrypt($imapPassword));
-
-        if (!$emailSettings->getId()) {
-            $entityManager->persist($emailSettings);
-        }
-
-        $entityManager->flush();
-
-        return $this->redirectToRoute('settings', ['tab' => 'email-settings']);
+    public function __construct(
+        EntityManagerInterface $em,
+        OpenSSLEncryptionSerivce $encryptionService,
+        EmailService $emailService,
+        LoggerInterface $logger
+    ) {
+        $this->em = $em;
+        $this->encryptionService = $encryptionService;
+        $this->emailService = $emailService;
+        $this->logger = $logger;
     }
 
-    #[Route('/email-settings/delete', name: 'delete-email')]
-    public function deleteEmailSettings(EntityManagerInterface $entityManager)
+    #[Route('/email-settings', name: 'email', methods: ['POST'])]
+    public function setEmailDetails(Request $request): Response
     {
-        $emailSettings = $entityManager->getRepository(EmailSettings::class)->findOneBy([], ['id' => 'DESC']);
-        if ($emailSettings) {
-            $entityManager->remove($emailSettings);
-            $entityManager->flush();
-        }
+        try {
+            $imapServer = $request->request->get('imap_server');
+            $imapPort = $request->request->get('imap_port');
+            $imapUsername = $request->request->get('imap_username');
+            $imapPassword = $request->request->get('imap_password');
 
-        return $this->redirectToRoute('settings', ['tab' => 'email-settings']);
-    }
+            if (empty($imapServer) || empty($imapPort) || empty($imapUsername) || empty($imapPassword)) {
+                $this->addFlash('error', 'All fields are required.');
 
-    public function getEmails(EntityManagerInterface $entityManager, OpenSSLEncryptionSerivce $encryptionSerivce)
-    {
-        $latestMail = null;
-        $emailConfigured = false;
-        $unreadCount = null;
-
-        $emailSettings = $entityManager->getRepository(EmailSettings::class)->findOneBy([], ['id' => 'DESC']);
-        if ($emailSettings) {
-            $emailConfigured = true;
-
-            $clientManager = new ClientManager();
-            $client = $clientManager->make([
-                'host' => $encryptionSerivce->decrypt($emailSettings->getImapServer()),
-                'port' => $emailSettings->getImapPort(),
-                'encryption' => 'ssl',
-                'username' => $encryptionSerivce->decrypt($emailSettings->getImapUser()),
-                'password' => $encryptionSerivce->decrypt($emailSettings->getImapPassword()),
-                'validate_cert' => true,
-                'protocol' => 'imap',
-            ]);
-
-            try {
-                $client->connect();
-
-                $folder = $client->getFolder('INBOX');
-                $unreadMessages = $folder->query()->unseen()->get();
-                $unreadCount = $unreadMessages->count();
-
-                $latestMessages = $folder->query()
-                    ->all()
-                    ->setFetchOrder('desc')
-                    ->limit(1)
-                    ->get();
-
-                if ($latestMessages->count() > 0) {
-                    $latestMail = $latestMessages->first();
-                    $latestMailDate = $latestMail->getDate()?->toDate();
-                    $latestMail->date = $latestMailDate ? $latestMailDate->format('d-m-Y H:i') : null;
-                }
-            } catch (\Exception $ex) {
-                $this->addFlash('error', 'Wystąpił błąd podczas pobierania e-maili: '.$ex->getMessage());
+                return $this->redirectToRoute('settings', ['tab' => 'email-settings']);
             }
+
+            $emailSettings = $this->em->getRepository(EmailSettings::class)->find(1) ?? new EmailSettings();
+            $emailSettings->setImapServer($this->encryptionService->encrypt($imapServer));
+            $emailSettings->setImapPort($imapPort);
+            $emailSettings->setImapUser($this->encryptionService->encrypt($imapUsername));
+            $emailSettings->setImapPassword($this->encryptionService->encrypt($imapPassword));
+
+            if (!$emailSettings->getId()) {
+                $this->em->persist($emailSettings);
+            }
+
+            $this->em->flush();
+            $this->addFlash('success', 'Email settings saved successfully.');
+        } catch (\Exception $e) {
+            $this->logger->error('Error saving email settings: '.$e->getMessage());
+            $this->addFlash('error', 'Failed to save email settings.');
         }
 
-        return [
-            'latestMail' => $latestMail,
-            'emailConfigured' => $emailConfigured,
-            'unreadCount' => $unreadCount,
-        ];
+        return $this->redirectToRoute('settings', ['tab' => 'email-settings']);
+    }
+
+    #[Route('/email-settings/delete', name: 'delete-email', methods: ['POST'])]
+    public function deleteEmailSettings(): Response
+    {
+        try {
+            $emailSettings = $this->em->getRepository(EmailSettings::class)->findOneBy([], ['id' => 'DESC']);
+            if ($emailSettings) {
+                $this->em->remove($emailSettings);
+                $this->em->flush();
+                $this->addFlash('success', 'Email settings deleted successfully.');
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('Error deleting email settings: '.$e->getMessage());
+            $this->addFlash('error', 'Failed to delete email settings.');
+        }
+
+        return $this->redirectToRoute('settings', ['tab' => 'email-settings']);
+    }
+
+    public function getEmails(): array
+    {
+        return $this->emailService->getEmails();
     }
 }

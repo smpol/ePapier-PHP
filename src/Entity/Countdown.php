@@ -49,11 +49,4 @@ class Countdown
         return $this;
     }
 
-    public function insertEvent(\DateTimeInterface $date, string $description): static
-    {
-        $this->setDate($date);
-        $this->setDescription($description);
-
-        return $this;
-    }
 }
