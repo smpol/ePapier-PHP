@@ -1,41 +1,34 @@
-FROM dunglas/frankenphp:php8.2-alpine
+FROM dunglas/frankenphp:1.1-php8.3-alpine
 
-# Skopiuj wszystkie pliki aplikacji
-COPY . /app
+ENV APP_ENV=prod \
+    APP_DEBUG=0 \
+    COMPOSER_ALLOW_SUPERUSER=1
 
-# Usuń zbędne pliki
-RUN mkdir -p var && chmod -R 775 var
-
-ENV COMPOSER_ALLOW_SUPERUSER=1
+WORKDIR /app
 
 # Instalacja rozszerzeń PHP oraz Composer
 RUN set -eux; \
-    install-php-extensions \
+    install-php-extensions --keep-source \
         @composer \
         intl \
         zip \
     ;
 
-RUN composer install --no-interaction --optimize-autoloader
+# Instalacja zależności aplikacji
+COPY --link composer.json composer.lock symfony.lock ./
+RUN composer install --no-dev --no-interaction --optimize-autoloader --classmap-authoritative --prefer-dist
 
-# Generowanie klucza szyfrowania
-RUN command=$(openssl rand -base64 32) && echo "ENCRYPTION_KEY=$command" >> .env
+# Skopiuj pozostałe pliki aplikacji
+COPY --link . ./
 
-# Migracja bazy danych
-RUN php bin/console doctrine:schema:update --force
+# Przygotowanie katalogów aplikacji
+RUN mkdir -p var \
+    && chown -R www-data:www-data var \
+    && chmod -R 775 var
 
-# Generowanie samopodpisanego certyfikatu SSL
-RUN mkdir -p /etc/caddy/certs && \
-    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
-    -keyout /etc/caddy/certs/localhost.key \
-    -out /etc/caddy/certs/localhost.crt \
-    -subj "/CN=localhost"
+# Optymalizacja cache Symfony
+RUN APP_ENV=${APP_ENV} APP_DEBUG=${APP_DEBUG} php bin/console cache:clear
 
-COPY Caddyfile /etc/caddy/Caddyfile
+COPY --link Caddyfile /etc/caddy/Caddyfile
 
-ENV APP_ENV=prod
-
-# Wystaw porty dla Caddy (HTTP i HTTPS)
 EXPOSE 80 443 443/udp
-
-
