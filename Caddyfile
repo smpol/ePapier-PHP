@@ -1,12 +1,5 @@
 {
     frankenphp
-
-    certificates {
-        on_demand
-        issuers {
-            internal
-        }
-    }
 }
 
 :80 {
@@ -20,7 +13,7 @@
 
     php_server
 
-    tls {
+    tls internal {
         on_demand
     }
 }
