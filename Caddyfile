@@ -1,5 +1,6 @@
 {
     frankenphp
+    order php_server before respond
 }
 
 :80 {
