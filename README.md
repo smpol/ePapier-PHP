@@ -84,7 +84,7 @@ docker compose -f "compose.yaml" up -d --build development-server
 
 Zmienne środowiskowe dla wersji deweloperskiej powinny znajdować się w pliku `.env.dev`.
 
-W obu przypadkach należy pamiętać o wygenerowaniu schematu bazy danych komendą (obraz produkcyjny robi to automatycznie na etapie budowy, ale lokalnie warto uruchomić ją ręcznie):
+W obu przypadkach należy pamiętać o schemacie bazy danych. W produkcyjnym obrazie schema zostanie utworzona automatycznie przy pierwszym uruchomieniu kontenera (jeśli plik `var/data.db` nie istnieje), a lokalnie warto uruchomić ją ręcznie:
 
 ```bash
 php bin/console doctrine:schema:update --force
