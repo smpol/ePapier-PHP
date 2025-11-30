@@ -8,7 +8,7 @@ WORKDIR /app
 
 # Instalacja rozszerzeń PHP oraz Composer
 RUN set -eux; \
-    install-php-extensions --keep-source \
+    install-php-extensions \
         @composer \
         intl \
         zip \
