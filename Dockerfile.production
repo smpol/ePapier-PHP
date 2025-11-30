@@ -21,6 +21,9 @@ RUN composer install --no-dev --no-interaction --optimize-autoloader --classmap-
 # Skopiuj pozostałe pliki aplikacji
 COPY --link . ./
 
+# Odbuduj autoload po skopiowaniu kodu, aby klasa Kernel trafiła do classmapy
+RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
+
 # Przygotowanie katalogów aplikacji
 RUN mkdir -p var \
     && chown -R www-data:www-data var \
