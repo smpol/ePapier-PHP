@@ -44,6 +44,9 @@ Przed uruchomieniem projektu należy utworzyć plik `.env` na podstawie pliku `.
     # Klucz szyfrowania - domyślnie generowany automatycznie przy pierwszym uruchomieniu (plik var/encryption.key)
     # ENCRYPTION_KEY=
 
+> [!NOTE]
+> Wersja produkcyjna dostarcza domyślne (puste) wartości dla zmiennych zewnętrznych, dzięki czemu kontener uruchamia się nawet bez skonfigurowanego Spotify/Google. Uzupełnij je w `.env`, aby aktywować integracje.
+
 ## Instalacja
 
 Projekt można uruchomić na dwa sposoby:
@@ -62,6 +65,8 @@ Projekt można uruchomić na dwa sposoby:
   docker compose -f "compose.prod.yaml" up -d --build production-server
   ```
 
+- Wersja produkcyjna zapisuje bazę SQLite w wolumenie `app_data` montowanym do katalogu `var/`, dzięki czemu dane przetrwają restarty kontenera.
+
 - Alternatywnie, utwórz obraz, a następnie kontener, udostępniając trzy porty:
   - 80
   - 443
@@ -79,7 +84,7 @@ docker compose -f "compose.yaml" up -d --build development-server
 
 Zmienne środowiskowe dla wersji deweloperskiej powinny znajdować się w pliku `.env.dev`.
 
-W obu przypadkach należy pamiętać o wygenerowaniu schematu bazy danych komendą:
+W obu przypadkach należy pamiętać o wygenerowaniu schematu bazy danych komendą (obraz produkcyjny robi to automatycznie na etapie budowy, ale lokalnie warto uruchomić ją ręcznie):
 
 ```bash
 php bin/console doctrine:schema:update --force

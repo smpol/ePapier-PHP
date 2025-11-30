@@ -2,7 +2,17 @@ FROM dunglas/frankenphp:1.1-php8.3-alpine
 
 ENV APP_ENV=prod \
     APP_DEBUG=0 \
-    COMPOSER_ALLOW_SUPERUSER=1
+    COMPOSER_ALLOW_SUPERUSER=1 \
+    DATABASE_URL="sqlite:////app/var/data.db" \
+    GOOGLE_CLIENT_ID= \
+    GOOGLE_PROJECT_ID= \
+    GOOGLE_AUTH_URI= \
+    GOOGLE_TOKEN_URI= \
+    GOOGLE_AUTH_PROVIDER_CERT_URL= \
+    GOOGLE_CLIENT_SECRET= \
+    SPOTIFY_CLIENT_ID= \
+    SPOTIFY_CLIENT_SECRET= \
+    REDIRECT_URL=
 
 WORKDIR /app
 
@@ -28,6 +38,9 @@ RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
 RUN mkdir -p var \
     && chown -R www-data:www-data var \
     && chmod -R 775 var
+
+# Wygeneruj schemat bazy danych (SQLite) w obrazie, aby uniknąć brakujących tabel
+RUN APP_ENV=${APP_ENV} APP_DEBUG=${APP_DEBUG} php bin/console doctrine:schema:update --force --no-interaction
 
 # Wykonaj skrypty auto-scripts po skopiowaniu aplikacji
 RUN APP_ENV=${APP_ENV} APP_DEBUG=${APP_DEBUG} php bin/console assets:install public \

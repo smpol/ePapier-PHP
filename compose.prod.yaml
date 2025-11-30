@@ -8,24 +8,29 @@ services:
     environment:
       APP_ENV: prod
       APP_DEBUG: 0
-      MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN}
-      DATABASE_URL: ${DATABASE_URL}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_PROJECT_ID: ${GOOGLE_PROJECT_ID}
-      GOOGLE_AUTH_URI: ${GOOGLE_AUTH_URI}
-      GOOGLE_TOKEN_URI: ${GOOGLE_TOKEN_URI}
-      GOOGLE_AUTH_PROVIDER_CERT_URL: ${GOOGLE_AUTH_PROVIDER_CERT_URL}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID}
-      SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET}
-      REDIRECT_URL: ${REDIRECT_URL}
+      MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN:-doctrine://default?auto_setup=0}
+      DATABASE_URL: ${DATABASE_URL:-sqlite:////app/var/data.db}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_PROJECT_ID: ${GOOGLE_PROJECT_ID:-}
+      GOOGLE_AUTH_URI: ${GOOGLE_AUTH_URI:-}
+      GOOGLE_TOKEN_URI: ${GOOGLE_TOKEN_URI:-}
+      GOOGLE_AUTH_PROVIDER_CERT_URL: ${GOOGLE_AUTH_PROVIDER_CERT_URL:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID:-}
+      SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET:-}
+      REDIRECT_URL: ${REDIRECT_URL:-}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
     ports:
       - "80:80"
       - "443:443"
       - "443:443/udp"
     restart: always
+    volumes:
+      - app_data:/app/var
     dns:
       - 1.1.1.1 # Cloudflare DNS (zalecane)
       - 8.8.8.8 # Google Public DNS (zalecane)
       - 8.8.4.4 # Google Public DNS (zalecane)
+
+volumes:
+  app_data:
