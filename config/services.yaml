@@ -9,6 +9,7 @@ parameters:
     env(REDIRECT_URL): ''
     env(SPOTIFY_CLIENT_ID): ''
     env(SPOTIFY_CLIENT_SECRET): ''
+    spotify_client_id: '%env(default::SPOTIFY_CLIENT_ID)%'
 
 services:
     # default configuration for services in *this* file

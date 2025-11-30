@@ -31,7 +31,7 @@ class SpotifyController extends AbstractController
         $redirectUri = $this->generateUrl('spotify-callback', [], \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL);
 
         $query = http_build_query([
-            'client_id' => $this->getParameter('env(SPOTIFY_CLIENT_ID)'),
+            'client_id' => $this->getParameter('spotify_client_id'),
             'response_type' => 'code',
             'redirect_uri' => $redirectUri,
             'scope' => $authorizationScope,
