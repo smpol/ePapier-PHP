@@ -3,8 +3,7 @@
 }
 
 :80 {
-    @http scheme http
-    redir @http https://{host}{uri}
+    redir https://{host}{uri}
 }
 
 :443 {
