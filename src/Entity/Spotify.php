@@ -19,9 +19,24 @@ class Spotify
     #[ORM\Column(length: 1000, nullable: true)]
     private ?string $refreshToken = null;
 
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $expiresAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->expiresAt;
+    }
+
+    public function setExpiresAt(?\DateTimeInterface $expiresAt): static
+    {
+        $this->expiresAt = $expiresAt;
+
+        return $this;
     }
 
     public function getAccessToken(): ?string

@@ -7,11 +7,13 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp"
+    env_file:
+      - .env
     environment:
-      - COMPOSER_ALLOW_SUPERUSER=1
+      - APP_ENV=prod
+      - APP_DEBUG=0
     restart: always
     dns:
       - 1.1.1.1 # Cloudflare DNS (zalecane)
       - 8.8.8.8 # Google Public DNS (zalecane)
       - 8.8.4.4 # Google Public DNS (zalecane)
-

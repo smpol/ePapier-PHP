@@ -28,6 +28,7 @@
         }
 
         function showPosition(position) {
+            console.log("GPS Position obtained:", position);
             document.getElementById("latitude").value = position.coords.latitude;
             document.getElementById("longitude").value = position.coords.longitude;
         }
