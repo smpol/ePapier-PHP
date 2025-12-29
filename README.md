@@ -41,8 +41,11 @@ Przed uruchomieniem projektu należy utworzyć plik `.env` na podstawie pliku `.
     ## Adres do przekierowywania spoza localhost (ustaw nazwę domeny zgodną z ustawieniami w Cloudflare w projekcie Python, np. local.example.com)
     REDIRECT_URL=
 
-    # Klucz szyfrowania, generowany przez base64_encode(openssl_random_pseudo_bytes(32)) - w wersji deweloperskiej należy wygenerować ręcznie
+    # Klucz szyfrowania - domyślnie generowany automatycznie przy pierwszym uruchomieniu (plik var/encryption.key)
     # ENCRYPTION_KEY=
+
+> [!NOTE]
+> Wersja produkcyjna dostarcza domyślne (puste) wartości dla zmiennych zewnętrznych, dzięki czemu kontener uruchamia się nawet bez skonfigurowanego Spotify/Google. Uzupełnij je w `.env`, aby aktywować integracje.
 
 ## Instalacja
 
@@ -56,6 +59,14 @@ Projekt można uruchomić na dwa sposoby:
   docker compose -f "compose.yaml" up -d --build production-server
   ```
 
+- Jeśli chcesz wstrzyknąć konfigurację z pliku `.env` (np. w środowisku produkcyjnym z własnym certyfikatem internal TLS), użyj przygotowanego pliku `compose.prod.yaml`:
+
+  ```bash
+  docker compose -f "compose.prod.yaml" up -d --build production-server
+  ```
+
+- Wersja produkcyjna zapisuje bazę SQLite w wolumenie `app_data` montowanym do katalogu `var/`, dzięki czemu dane przetrwają restarty kontenera.
+
 - Alternatywnie, utwórz obraz, a następnie kontener, udostępniając trzy porty:
   - 80
   - 443
@@ -63,7 +74,7 @@ Projekt można uruchomić na dwa sposoby:
 
 ### 2) Wersja deweloperska
 
-a) Wymagane jest zainstalowanie PHP oraz zależności poprzez Composer. W pliku `.env` należy wygenerować `ENCRYPTION_KEY` zgodnie z instrukcjami w `.env.example`.
+a) Wymagane jest zainstalowanie PHP oraz zależności poprzez Composer. `ENCRYPTION_KEY` zostanie wygenerowany automatycznie przy pierwszym użyciu (jeśli chcesz użyć własnego, dodaj go do pliku `.env`).
 
 b) Uruchom serwer Symfony przy użyciu Docker Compose:
 
@@ -73,7 +84,7 @@ docker compose -f "compose.yaml" up -d --build development-server
 
 Zmienne środowiskowe dla wersji deweloperskiej powinny znajdować się w pliku `.env.dev`.
 
-W obu przypadkach należy pamiętać o wygenerowaniu schematu bazy danych komendą:
+W obu przypadkach należy pamiętać o schemacie bazy danych. W produkcyjnym obrazie schema zostanie utworzona automatycznie przy pierwszym uruchomieniu kontenera (jeśli plik `var/data.db` nie istnieje), a lokalnie warto uruchomić ją ręcznie:
 
 ```bash
 php bin/console doctrine:schema:update --force

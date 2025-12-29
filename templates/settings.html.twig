@@ -167,7 +167,7 @@
                                         id="latitude"
                                         name="latitude"
                                         placeholder="Auto-filled by GPS or Selected City"
-                                        value="{% if location %} {{ location.lat }} {% endif %}"
+                                        value="{% if location is defined and location %} {{ location.lat }} {% endif %}"
                                         readonly
                                 />
                             </div>
@@ -179,7 +179,7 @@
                                         id="longitude"
                                         name="longitude"
                                         placeholder="Auto-filled by GPS or Selected City"
-                                        value="{% if location %} {{ location.lon }} {% endif %}"
+                                        value="{% if location is defined and location %} {{ location.lon }} {% endif %}"
                                         readonly
                                 />
                             </div>

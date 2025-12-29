@@ -4,6 +4,12 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    env(GOOGLE_CLIENT_ID): ''
+    env(GOOGLE_CLIENT_SECRET): ''
+    env(REDIRECT_URL): ''
+    env(SPOTIFY_CLIENT_ID): ''
+    env(SPOTIFY_CLIENT_SECRET): ''
+    spotify_client_id: '%env(default::SPOTIFY_CLIENT_ID)%'
 
 services:
     # default configuration for services in *this* file
@@ -24,11 +30,11 @@ services:
     # please note that last definitions always *replace* previous ones
     App\Service\GoogleClientService:
         arguments:
-            $googleClientId: '%env(GOOGLE_CLIENT_ID)%'
-            $googleClientSecret: '%env(GOOGLE_CLIENT_SECRET)%'
-            $redirectUrl: '%env(REDIRECT_URL)%'
+            $googleClientId: '%env(default::GOOGLE_CLIENT_ID)%'
+            $googleClientSecret: '%env(default::GOOGLE_CLIENT_SECRET)%'
+            $redirectUrl: '%env(default::REDIRECT_URL)%'
     App\Service\SpotifyService:
         arguments:
-            $clientId: '%env(SPOTIFY_CLIENT_ID)%'
-            $clientSecret: '%env(SPOTIFY_CLIENT_SECRET)%'
-            $redirectUrl: '%env(REDIRECT_URL)%'
+            $clientId: '%env(default::SPOTIFY_CLIENT_ID)%'
+            $clientSecret: '%env(default::SPOTIFY_CLIENT_SECRET)%'
+            $redirectUrl: '%env(default::REDIRECT_URL)%'

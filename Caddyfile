@@ -1,12 +1,19 @@
 {
     frankenphp
-    debug
+    order php_server before respond
+}
+
+:80 {
+    redir https://{host}{uri}
 }
 
 :443 {
     root * public/
     encode zstd br gzip
+
     php_server
 
-    tls /etc/caddy/certs/localhost.crt /etc/caddy/certs/localhost.key
+    tls internal {
+        on_demand
+    }
 }

@@ -43,7 +43,13 @@ class SettingsController extends AbstractController
     public function settings(): Response
     {
         try {
-            $solarEdgeSettings = $this->em->getRepository(SolarEdge::class)->findOneBy([], ['id' => 'DESC']);
+            try {
+                $solarEdgeSettings = $this->em->getRepository(SolarEdge::class)->findOneBy([], ['id' => 'DESC']);
+            } catch (\Exception $e) {
+                // Ignore missing table error to allow other settings to load
+                $this->logger->error('Error loading SolarEdge settings: '.$e->getMessage());
+                $solarEdgeSettings = null;
+            }
             $emailSettings = $this->em->getRepository(EmailSettings::class)->findOneBy([], ['id' => 'DESC']);
             $location = $this->em->getRepository(Location::class)->find(1);
             $spotifySettings = $this->em->getRepository(Spotify::class)->findOneBy([], ['id' => 'DESC']);
@@ -75,7 +81,19 @@ class SettingsController extends AbstractController
             $this->logger->error('Error loading settings page: '.$e->getMessage());
             $this->addFlash('error', 'Failed to load settings page.');
 
-            return $this->render('settings.html.twig');
+            return $this->render('settings.html.twig', [
+                'solarEdgeSettings' => null,
+                'emailSettings' => null,
+                'location' => null,
+                'spotifySettings' => null,
+                'googleSettings' => null,
+                'availableComponents' => [],
+                'selectedComponents' => array_fill(0, 6, ''), // Assuming 6 components
+                'replacementLayout' => array_fill(0, 6, ''),
+                'countDown' => [],
+                'timeZones' => [],
+                'selectedTimezone' => null,
+            ]);
         }
     }
 }

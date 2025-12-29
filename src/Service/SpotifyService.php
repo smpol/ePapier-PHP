@@ -115,9 +115,20 @@ class SpotifyService
         return null;
     }
 
-    public function handleCallback(string $authorizationCode): void
+    public function handleCallback(string $authorizationCode, ?string $redirectUri = null, ?string $codeVerifier = null): void
     {
         $client = $this->clientFactory->createClient();
+        $redirectUrl = $redirectUri ?? $this->redirectUrl;
+
+        $body = [
+            'grant_type' => 'authorization_code',
+            'code' => $authorizationCode,
+            'redirect_uri' => $redirectUrl,
+        ];
+
+        if ($codeVerifier) {
+            $body['code_verifier'] = $codeVerifier;
+        }
 
         try {
             $response = $client->request('POST', 'https://accounts.spotify.com/api/token', [
@@ -125,11 +136,7 @@ class SpotifyService
                     'Authorization' => 'Basic '.base64_encode($this->clientId.':'.$this->clientSecret),
                     'Content-Type' => 'application/x-www-form-urlencoded',
                 ],
-                'body' => [
-                    'grant_type' => 'authorization_code',
-                    'code' => $authorizationCode,
-                    'redirect_uri' => $this->redirectUrl,
-                ],
+                'body' => $body,
             ]);
 
             if (200 === $response->getStatusCode()) {
