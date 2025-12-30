@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Control Panel</title>
     <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Stylizacja przycisków bez użycia ikon Bootstrap */
         .btn-icon {
@@ -376,58 +377,75 @@
                 <div class="card shadow-lg">
                     <div class="card-header bg-primary text-white text-center">
                         <h3>Countdown Settings</h3>
+                        <small>Only the first 2 countdowns (by date) will be displayed on screen</small>
                     </div>
                     <div class="card-body">
-                        {% if not countDown %}
-                            <form action="{{ path('setCountdown') }}" method="post">
-                                <div class="mb-3">
-                                    <label for="countdown_date" class="form-label
-                                    ">Countdown Date</label>
+                        {# Existing countdowns with edit capability #}
+                        {% if countDown %}
+                            <h5 class="mb-3">Existing Countdowns</h5>
+                            {% for countdown in countDown %}
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="row g-2 align-items-end">
+                                            <div class="col-md-4">
+                                                <label for="countdown_date_{{ countdown.id }}" class="form-label">Date</label>
+                                                <input type="datetime-local" class="form-control" 
+                                                       id="countdown_date_{{ countdown.id }}"
+                                                       name="countdown_date" 
+                                                       form="update_form_{{ countdown.id }}"
+                                                       value="{{ countdown.date|date('Y-m-d\\TH:i') }}" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="countdown_title_{{ countdown.id }}" class="form-label">Title</label>
+                                                <input type="text" class="form-control" 
+                                                       id="countdown_title_{{ countdown.id }}"
+                                                       name="countdown_title" 
+                                                       form="update_form_{{ countdown.id }}"
+                                                       value="{{ countdown.description }}"
+                                                       minlength="1" maxlength="18" required>
+                                            </div>
+                                            <div class="col-md-4 d-flex gap-2">
+                                                <form action="{{ path('updateCountdown') }}" method="post" id="update_form_{{ countdown.id }}" class="flex-grow-1">
+                                                    <input type="hidden" name="countdown_id" value="{{ countdown.id }}">
+                                                    <button type="submit" class="btn btn-primary w-100">
+                                                        <i class="fas fa-save"></i> Save
+                                                    </button>
+                                                </form>
+                                                <form action="{{ path('deleteCountdown') }}" method="post">
+                                                    <input type="hidden" name="countdown_id" value="{{ countdown.id }}">
+                                                    <button type="submit" class="btn btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <hr>
+                        {% endif %}
+
+                        {# Add new countdown form - always visible #}
+                        <h5 class="mb-3">Add New Countdown</h5>
+                        <form action="{{ path('setCountdown') }}" method="post">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-5">
+                                    <label for="countdown_date" class="form-label">Countdown Date</label>
                                     <input type="datetime-local" class="form-control" id="countdown_date"
                                            name="countdown_date" required>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="countdown_title" class="form-label
-                                    ">Countdown Title</label>
+                                <div class="col-md-5">
+                                    <label for="countdown_title" class="form-label">Countdown Title</label>
                                     <input type="text" class="form-control" id="countdown_title" name="countdown_title"
-                                           minlength="1" maxlength="18"
-                                           required>
+                                           minlength="1" maxlength="18" required>
                                 </div>
-                                <div class="d-flex justify-content-between">
-                                    <button type="submit" class="btn btn-success">
-                                        <i class="fas fa-save"></i> Save Countdown
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="fas fa-plus"></i> Add
                                     </button>
                                 </div>
-                            </form>
-                        {% else %}
-                            {% for countdown in countDown %}
-                                <form action="{{ path('deleteCountdown') }}" method="post">
-                                    <input type="hidden" name="countdown_id" value="{{ countdown.id }}">
-                                    <button type="submit" class="btn btn-danger" style="margin-bottom: 5px">
-                                        Remove Countdown {{ countdown.description }}
-                                    </button>
-                                </form>
-                            {% endfor %}
-                            {% if countDown|length < 2 %}
-                                <form action="{{ path('setCountdown') }}" method="post" style="margin-top: 15px;">
-                                    <div class="mb-3">
-                                        <label for="countdown_date" class="form-label">Countdown Date</label>
-                                        <input type="datetime-local" class="form-control" id="countdown_date"
-                                               name="countdown_date" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="countdown_title" class="form-label">Countdown Title</label>
-                                        <input type="text" class="form-control" id="countdown_title"
-                                               name="countdown_title" minlength="1" maxlength="18" required>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <button type="submit" class="btn btn-success">
-                                            <i class="fas fa-save"></i> Save Countdown
-                                        </button>
-                                    </div>
-                                </form>
-                            {% endif %}
-                        {% endif %}
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

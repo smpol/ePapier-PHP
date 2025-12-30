@@ -122,8 +122,8 @@ class ScreenController extends AbstractController
             return $data;
         });
 
-        $spotify = $cache->get('spotify_now_playing', function (ItemInterface $item) use ($spotifyController, $entityManager) {
-            $data = $spotifyController->getPlayingNow($entityManager);
+        $spotify = $cache->get('spotify_now_playing', function (ItemInterface $item) use ($spotifyController) {
+            $data = $spotifyController->getPlayingNow();
             $item->expiresAfter(10);
 
             return $data;
@@ -175,7 +175,7 @@ class ScreenController extends AbstractController
                 'events' => $getEvents,
                 'layout' => $layout,
                 'airQuality' => $airQuality,
-                'countdown' => $countdown,
+                'countdown' => array_slice($countdown, 0, 2),
                 'timeZone' => $timeZone->getTimezone(),
             ]);
         }

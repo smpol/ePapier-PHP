@@ -123,7 +123,21 @@ class SpotifyService
             ]);
 
             if (200 === $response->getStatusCode()) {
-                return $response->toArray();
+                $data = $response->toArray();
+                
+                // Check if something is actually playing
+                if (!isset($data['item']) || !$data['is_playing']) {
+                    return null;
+                }
+                
+                $item = $data['item'];
+                
+                // Transform to format expected by Spotify.html.twig template
+                return [
+                    'title' => $item['name'] ?? 'Unknown Track',
+                    'album' => $item['album']['name'] ?? 'Unknown Album',
+                    'artists' => array_map(fn($artist) => $artist['name'], $item['artists'] ?? []),
+                ];
             }
 
             if (204 === $response->getStatusCode()) {
@@ -131,6 +145,7 @@ class SpotifyService
             }
 
         } catch (\Exception $e) {
+            error_log('Spotify API Error: ' . $e->getMessage());
             return null;
         }
 

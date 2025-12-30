@@ -8,6 +8,11 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
+# Git (large, not needed in container)
+.git/
+.gitignore
+.gitattributes
+
 ###> phpunit/phpunit ###
 /phpunit.xml
 .phpunit.result.cache

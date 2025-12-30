@@ -16,13 +16,26 @@ class CountdownController extends AbstractController
         $dateTime = $request->request->get('countdown_date');
         $description = $request->request->get('countdown_title');
 
-        // Sprawdź, ile odliczań już istnieje
-        $countdowns = $entityManager->getRepository(Countdown::class)->findAll();
+        // No limit on number of countdowns - display is limited in ScreenController
+        $countdown = new Countdown();
+        $countdown->insertEvent(new \DateTime($dateTime), $description);
+        $entityManager->persist($countdown);
+        $entityManager->flush();
 
-        if (count($countdowns) < 2) {
-            $countdown = new Countdown();
-            $countdown->insertEvent(new \DateTime($dateTime), $description);
-            $entityManager->persist($countdown);
+        return $this->redirectToRoute('settings', ['tab' => 'countdown-settings']);
+    }
+
+    #[Route('/update-countdown', name: 'updateCountdown', methods: ['POST'])]
+    public function updateCountdown(Request $request, EntityManagerInterface $entityManager)
+    {
+        $id = $request->request->get('countdown_id');
+        $dateTime = $request->request->get('countdown_date');
+        $description = $request->request->get('countdown_title');
+
+        $countdown = $entityManager->getRepository(Countdown::class)->find($id);
+        if ($countdown) {
+            $countdown->setDate(new \DateTime($dateTime));
+            $countdown->setDescription($description);
             $entityManager->flush();
         }
 
