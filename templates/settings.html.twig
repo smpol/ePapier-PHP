@@ -46,12 +46,12 @@
         <div class="col-lg-9">
             <!-- Location Settings -->
             <div id="location-settings" class="settings-section dashboard-card active">
-                <div class="card-header bg-white border-0 pb-0">
+                <div class="card-header border-0 pb-0">
                     <div class="d-flex align-items-center">
-                        <div class="p-2 rounded-3 me-3 text-slate-400">
+                        <div class="me-3 text-muted">
                             <i class="fas fa-map-marker-alt fa-lg"></i>
                         </div>
-                        <h4 class="mb-0 fs-5">Location Settings</h4>
+                        <h4 class="mb-0 fs-5 font-heading">Location Settings</h4>
                     </div>
                 </div>
                 <div class="card-body">
@@ -91,12 +91,12 @@
 
             <!-- SolarEdge Settings -->
             <div id="solar-settings" class="settings-section dashboard-card">
-                <div class="card-header bg-white border-0 pb-0">
+                <div class="card-header border-0 pb-0">
                     <div class="d-flex align-items-center">
-                        <div class="p-2 rounded-3 me-3 text-slate-400">
+                        <div class="me-3 text-muted">
                             <i class="fas fa-sun fa-lg"></i>
                         </div>
-                        <h4 class="mb-0 fs-5">SolarEdge API</h4>
+                        <h4 class="mb-0 fs-5 font-heading">SolarEdge API</h4>
                     </div>
                 </div>
                 <div class="card-body">
@@ -131,12 +131,12 @@
 
             <!-- Email Settings -->
             <div id="email-settings" class="settings-section dashboard-card">
-                <div class="card-header bg-white border-0 pb-0">
+                <div class="card-header border-0 pb-0">
                     <div class="d-flex align-items-center">
-                        <div class="p-2 rounded-3 me-3 text-slate-400">
+                        <div class="me-3 text-muted">
                             <i class="fas fa-envelope fa-lg"></i>
                         </div>
-                        <h4 class="mb-0 fs-5">Email Account</h4>
+                        <h4 class="mb-0 fs-5 font-heading">Email Account</h4>
                     </div>
                 </div>
                 <div class="card-body">
@@ -181,12 +181,12 @@
 
             <!-- Google Calendar Settings -->
             <div id="google-settings" class="settings-section dashboard-card">
-                <div class="card-header bg-white border-0 pb-0">
+                <div class="card-header border-0 pb-0">
                     <div class="d-flex align-items-center">
-                        <div class="p-2 rounded-3 me-3 text-slate-400">
+                        <div class="me-3 text-muted">
                             <i class="fab fa-google fa-lg"></i>
                         </div>
-                        <h4 class="mb-0 fs-5">Google Calendar</h4>
+                        <h4 class="mb-0 fs-5 font-heading">Google Calendar</h4>
                     </div>
                 </div>
                 <div class="card-body text-center py-5">
@@ -208,12 +208,12 @@
 
             <!-- Spotify Settings -->
             <div id="spotify-settings" class="settings-section dashboard-card">
-                <div class="card-header bg-white border-0 pb-0">
+                <div class="card-header border-0 pb-0">
                     <div class="d-flex align-items-center">
-                        <div class="p-2 rounded-3 me-3 text-slate-400">
+                        <div class="me-3 text-muted">
                             <i class="fab fa-spotify fa-lg"></i>
                         </div>
-                        <h4 class="mb-0 fs-5">Spotify Integration</h4>
+                        <h4 class="mb-0 fs-5 font-heading">Spotify Integration</h4>
                     </div>
                 </div>
                 <div class="card-body text-center py-5">
@@ -235,12 +235,12 @@
 
             <!-- Countdown Settings -->
             <div id="countdown-settings" class="settings-section dashboard-card">
-                <div class="card-header bg-white border-0 pb-0">
+                <div class="card-header border-0 pb-0">
                     <div class="d-flex align-items-center">
-                        <div class="p-2 rounded-3 me-3 text-slate-400">
+                        <div class="me-3 text-muted">
                             <i class="fas fa-hourglass-half fa-lg"></i>
                         </div>
-                        <h4 class="mb-0 fs-5">Countdowns</h4>
+                        <h4 class="mb-0 fs-5 font-heading">Countdowns</h4>
                     </div>
                 </div>
                 <div class="card-body">
@@ -252,7 +252,7 @@
                                     <div class="p-3 border rounded-3 bg-light">
                                         <form action="{{ path('updateCountdown') }}" method="post" id="update_form_{{ countdown.id }}">
                                             <input type="hidden" name="countdown_id" value="{{ countdown.id }}">
-                                            <div class="row g-2 align-items-center">
+                                    <div class="row g-2 align-items-center">
                                                 <div class="col-md-5">
                                                     <input type="datetime-local" class="form-control-premium" name="countdown_date" value="{{ countdown.date|date('Y-m-d\\TH:i') }}" required>
                                                 </div>
@@ -260,10 +260,10 @@
                                                     <input type="text" class="form-control-premium" name="countdown_title" value="{{ countdown.description }}" minlength="1" maxlength="18" required>
                                                 </div>
                                                 <div class="col-md-3 d-flex gap-2">
-                                                    <button type="submit" class="btn btn-primary btn-sm rounded-2 flex-grow-1">
+                                                    <button type="submit" class="btn btn-primary btn-sm rounded-0 flex-grow-1" style="background: var(--primary-color); border-color: var(--primary-color);">
                                                         <i class="fas fa-save"></i>
                                                     </button>
-                                                    <button type="submit" form="delete_form_{{ countdown.id }}" class="btn btn-outline-danger btn-sm rounded-2">
+                                                    <button type="submit" form="delete_form_{{ countdown.id }}" class="btn btn-outline-danger btn-sm rounded-0">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>
@@ -302,12 +302,12 @@
 
             <!-- Timezone Settings -->
             <div id="timezone-settings" class="settings-section dashboard-card">
-                <div class="card-header bg-white border-0 pb-0">
+                <div class="card-header border-0 pb-0">
                     <div class="d-flex align-items-center">
-                        <div class="p-2 rounded-3 me-3 text-slate-400">
+                        <div class="me-3 text-muted">
                             <i class="fas fa-globe fa-lg"></i>
                         </div>
-                        <h4 class="mb-0 fs-5">Timezone</h4>
+                        <h4 class="mb-0 fs-5 font-heading">Timezone</h4>
                     </div>
                 </div>
                 <div class="card-body">
@@ -332,12 +332,12 @@
 
             <!-- Layout Settings -->
             <div id="layout-settings" class="settings-section dashboard-card">
-                <div class="card-header bg-white border-0 pb-0">
+                <div class="card-header border-0 pb-0">
                     <div class="d-flex align-items-center">
-                        <div class="p-2 rounded-3 me-3 text-slate-400">
+                        <div class="me-3 text-muted">
                             <i class="fas fa-th-large fa-lg"></i>
                         </div>
-                        <h4 class="mb-0 fs-5">Dashboard Layout</h4>
+                        <h4 class="mb-0 fs-5 font-heading">Dashboard Layout</h4>
                     </div>
                 </div>
                 <div class="card-body">
@@ -345,7 +345,7 @@
                         <div id="dashboard-grid" class="row g-3 mb-4">
                             {% for i in 0..5 %}
                                 <div class="col-md-6 col-xl-4">
-                                    <div class="p-3 border rounded-3 bg-light h-100">
+                                    <div class="p-3 border rounded-0 bg-light h-100" style="border-color: var(--border-color) !important;">
                                         <div class="mb-3">
                                             <label class="form-label-premium small text-uppercase">Slot {{ i + 1 }}</label>
                                             <select class="form-select form-control-premium component-select-input" name="component{{ i + 1 }}" required>

@@ -14,6 +14,7 @@ services:
     env_file:
       - .env
     environment:
+      - TZ=Europe/Warsaw
       - APP_ENV=dev
       - APP_DEBUG=1 # Keep debug=1 to see errors if they happen, but env is prod
       - DATABASE_URL=sqlite:////app/var/data.db

@@ -18,6 +18,10 @@ chmod -R 777 var
 echo "🗄️ Updating database schema..."
 php bin/console doctrine:schema:update --force --no-interaction || true
 
+# Seed default timezone if missing
+echo "🌍 Seeding default timezone..."
+php bin/console doctrine:query:sql "INSERT OR IGNORE INTO timezone (id, timezone) VALUES (1, 'Europe/Warsaw')" || true
+
 # Clear cache in case files changed
 echo "🧹 Clearing Symfony cache..."
 php bin/console cache:clear --no-warmup || true
