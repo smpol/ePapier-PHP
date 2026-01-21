@@ -12,7 +12,8 @@ ENV APP_ENV=prod \
     GOOGLE_CLIENT_SECRET= \
     SPOTIFY_CLIENT_ID= \
     SPOTIFY_CLIENT_SECRET= \
-    REDIRECT_URL=
+    REDIRECT_URL= \
+    TZ=Europe/Warsaw
 
 WORKDIR /app
 
@@ -24,6 +25,8 @@ RUN set -eux; \
         zip \
         opcache \
     ;
+
+RUN echo "date.timezone=Europe/Warsaw" >> /usr/local/etc/php/conf.d/docker-php-ext-date.ini
 
 # Copy only dependency files first (better caching)
 COPY composer.json composer.lock symfony.lock ./

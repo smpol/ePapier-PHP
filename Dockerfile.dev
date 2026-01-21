@@ -1,0 +1,29 @@
+FROM dunglas/frankenphp:php8.3-alpine
+
+ENV APP_ENV=dev \
+    APP_DEBUG=1 \
+    COMPOSER_ALLOW_SUPERUSER=1
+
+WORKDIR /app
+
+# Install PHP extensions and development tools
+RUN set -eux; \
+    install-php-extensions \
+        @composer \
+        intl \
+        zip \
+        opcache \
+    ;
+    # xdebug extension removed temporarily for debugging
+
+COPY Caddyfile.dev /etc/caddy/Caddyfile
+COPY docker-entrypoint.dev.sh /usr/local/bin/docker-entrypoint.sh
+
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# In dev, we mostly rely on volume mounts, but having these helps
+RUN mkdir -p var && chown -R www-data:www-data var && chmod -R 777 var
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
+EXPOSE 80 443 443/udp
