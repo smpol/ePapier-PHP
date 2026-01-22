@@ -15,7 +15,7 @@
         body,
         html {
             width: 800px;
-            height: 400px;
+            height: 480px;
             margin: 0;
             padding: 0;
             overflow: hidden;
@@ -42,20 +42,35 @@
         .card {
             border: 1px solid #000000;
             margin-bottom: 5px;
-            height: 180px;
+            height: 225px;
 
         }
 
         .card-body {
             padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            height: 100%;
         }
 
         .event-summary {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 200px;
+            max-width: 240px;
             display: inline-block;
+        }
+
+        /* Tighten horizontal spacing and fix overflow */
+        .row {
+            margin-left: -2px;
+            margin-right: -2px;
+        }
+
+        .row > [class*='col-'] {
+            padding-right: 2px;
+            padding-left: 2px;
         }
     </style>
 </head>

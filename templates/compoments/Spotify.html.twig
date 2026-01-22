@@ -14,16 +14,14 @@
                     <h5>{{ spotifyNowPlaying.error }}</h5>
                 {% else %}
                     <h5><b>Playing Now:</b></h5>
-                    <p class="event-summary">
+                    <div class="event-summary">
                         {% for artist in spotifyNowPlaying.artists %}
                             {{ artist }}{% if not loop.last %}, {% endif %}
                         {% endfor %}
-
-
-                    </p><br/>
-                    <p class="event-summary">{{ spotifyNowPlaying.album }}</p><br/>
+                    </div>
+                    <div class="event-summary">{{ spotifyNowPlaying.album }}</div>
                     {% if spotifyNowPlaying.album !=  spotifyNowPlaying.title %}
-                        <p class="event-summary">{{ spotifyNowPlaying.title }}</p><br/>
+                        <div class="event-summary">{{ spotifyNowPlaying.title }}</div>
                     {% endif %}
                 {% endif %}
             {% endif %}
