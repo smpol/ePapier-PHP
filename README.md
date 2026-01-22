@@ -50,16 +50,33 @@ Projekt można uruchomić na dwa sposoby:
 
 ### 1) Wersja produkcyjna (Docker)
 
-- Uruchom za pomocą komendy:
+Zoptymalizowana pod kątem Raspberry Pi, umożliwiająca szybkie aktualizacje bez długiego budowania obrazu.
 
-  ```bash
-  docker compose -f "compose.yaml" up -d --build production-server
-  ```
+**Pierwsze uruchomienie:**
+```bash
+docker compose up -d --build production-server
+```
 
-- Alternatywnie, utwórz obraz, a następnie kontener, udostępniając trzy porty:
-  - 80
-  - 443
-  - 443/udp
+**Szybka aktualizacja (Fast Update):**
+Jeśli zmienisz kod (np. `git pull`), nie musisz budować obrazu na nowo. Wystarczy zrestartować kontener:
+```bash
+git pull
+docker compose restart production-server
+```
+Skrypt startowy automatycznie wyczyści cache i zaktualizuje schemat bazy danych.
+
+**Czysty start (Fresh Start):**
+Aby postawić projekt od zera (wyczyścić bazę i zależności):
+```bash
+docker compose down -v
+rm -rf vendor/ var/
+docker compose up -d
+```
+
+**Wymuszenie przebudowania assetów:**
+```bash
+REBUILD_ASSETS=1 docker compose restart production-server
+```
 
 ### 2) Wersja deweloperska
 

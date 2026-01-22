@@ -9,12 +9,21 @@ services:
       - "443:443/udp"
     env_file:
       - .env
+    volumes:
+      - .:/app:cached
+      - ./var:/app/var:rw
+      - db_data:/app/var/db:rw
     environment:
       - TZ=Europe/Warsaw
       - APP_ENV=prod
       - APP_DEBUG=0
+      - REBUILD_ASSETS=0
+      - DATABASE_URL=sqlite:////app/var/db/data.db
     restart: always
     dns:
-      - 1.1.1.1 # Cloudflare DNS (zalecane)
-      - 8.8.8.8 # Google Public DNS (zalecane)
-      - 8.8.4.4 # Google Public DNS (zalecane)
+      - 1.1.1.1
+      - 8.8.8.8
+      - 8.8.4.4
+
+volumes:
+  db_data:
