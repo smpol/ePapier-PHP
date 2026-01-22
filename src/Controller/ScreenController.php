@@ -47,7 +47,10 @@ class ScreenController extends AbstractController
                 }
             }
         }
-        $countdown = $entityManager->getRepository(Countdown::class)->findBy([], ['date' => 'ASC']);
+        $allCountdowns = $entityManager->getRepository(Countdown::class)->findBy([], ['date' => 'ASC']);
+        $now = new \DateTime();
+        $futureCountdowns = array_filter($allCountdowns, fn($c) => $c->getDate() > $now);
+        $countdown = array_slice($futureCountdowns, 0, 2);
         $location = $entityManager->getRepository(Location::class)->find(1);
 
         $weatherData = $cache->get('weather_data', function (ItemInterface $item) use ($weatherService, $location, $cache) {
@@ -175,7 +178,7 @@ class ScreenController extends AbstractController
                 'events' => $getEvents,
                 'layout' => $layout,
                 'airQuality' => $airQuality,
-                'countdown' => array_slice($countdown, 0, 2),
+                'countdown' => $countdown,
                 'timeZone' => $timeZone->getTimezone(),
             ]);
         }
