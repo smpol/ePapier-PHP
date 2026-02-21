@@ -158,12 +158,24 @@ class ScreenController extends AbstractController
             $entityManager->flush();
         }
 
-        $spotifySettings = $entityManager->getRepository(\App\Entity\Spotify::class)->findBy([], ['id' => 'DESC'], 1);
-        $isFullScreenEnabled = \count($spotifySettings) > 0 ? $spotifySettings[0]->isFullScreenOnSecond() : false;
+        $spotifySettings = $entityManager->getRepository(\App\Entity\Spotify::class)->findOneBy([], ['id' => 'DESC']);
+        $isFullScreenEnabled = $spotifySettings ? $spotifySettings->isFullScreenOnSecond() : false;
+        $isAlwaysFullScreen = $spotifySettings ? $spotifySettings->isFullScreenAlways() : false;
 
-        if ($request->query->get('second') && $isFullScreenEnabled && $spotify && isset($spotify['status']) && $spotify['status'] === 'playing') {
+        $shouldShowFullScreen = false;
+        if ($spotify && isset($spotify['status']) && $spotify['status'] === 'playing') {
+            if ($request->query->get('second') && $isFullScreenEnabled) {
+                $shouldShowFullScreen = true;
+            } elseif ($isAlwaysFullScreen) {
+                $shouldShowFullScreen = true;
+            }
+        }
+
+        if ($shouldShowFullScreen) {
             return $this->render('spotify_fullscreen.html.twig', [
                 'spotifyNowPlaying' => $spotify,
+                'weather' => $weatherData,
+                'timeZone' => $timeZone->getTimezone(),
             ]);
         }
 

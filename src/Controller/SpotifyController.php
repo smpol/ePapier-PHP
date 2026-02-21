@@ -116,7 +116,9 @@ class SpotifyController extends AbstractController
         $spotify = $this->em->getRepository(Spotify::class)->findOneBy([], ['id' => 'DESC']);
         if ($spotify) {
             $isFullScreen = $request->request->get('fullScreenOnSecond') === 'on';
+            $isFullScreenAlways = $request->request->get('fullScreenAlways') === 'on';
             $spotify->setFullScreenOnSecond($isFullScreen);
+            $spotify->setFullScreenAlways($isFullScreenAlways);
             $this->em->flush();
         }
 

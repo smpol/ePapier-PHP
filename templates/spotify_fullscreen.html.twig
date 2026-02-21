@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Odtwarzacz</title>
-    <!-- Zewnętrzne czcionki do nadania nowoczesnego sznytu -->
+    <title>Spotify Player</title>
+    <!-- External fonts for modern look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
-        /* Styl bazowy dla E-INK - bardzo wysoki kontrast, absolutna czerń i biel */
+        /* Base e-ink style - extremely high contrast, pure black and white */
         :root {
             --bg-color: #ffffff;
             --text-main: #000000;
@@ -144,6 +144,32 @@
             z-index: 10;
         }
 
+        .status-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 40px;
+            right: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            z-index: 10;
+            border-top: 2px solid #000000;
+            padding-top: 15px;
+        }
+
+        .status-time {
+            font-size: 2.2rem;
+            font-family: monospace;
+        }
+
+        .status-weather {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -189,6 +215,40 @@
             </div>
         </div>
     </div>
+
+    <div class="status-bar">
+        <div class="status-time" id="current-time">
+            --:--
+        </div>
+        {% if weather and weather.current_weather %}
+            <div class="status-weather">
+                <i class="fas fa-thermometer-half"></i>
+                <span>{{ weather.current_weather.temperature|round(1) }}°C</span>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            // Simple manual UTC adjustment if needed, but let's try browser locale first
+            const options = { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: false,
+                timeZone: '{{ timeZone }}'
+            };
+            try {
+                const timeString = new Intl.DateTimeFormat('en-GB', options).format(now);
+                document.getElementById('current-time').textContent = timeString;
+            } catch (e) {
+                const clock = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+                document.getElementById('current-time').textContent = clock;
+            }
+        }
+        updateClock();
+        setInterval(updateClock, 60000);
+    </script>
     
     <!-- Skrypt odświeżający ten widok pełnoekranowy co 15 sekund ze względu na ekrany eink (by nie migały cały czas) -->
     <script>

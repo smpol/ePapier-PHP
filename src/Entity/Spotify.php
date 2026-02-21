@@ -22,8 +22,11 @@ class Spotify
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $expiresAt = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?bool $fullScreenOnSecond = null;
+    #[ORM\Column(options: ["default" => false])]
+    private ?bool $fullScreenOnSecond = false;
+
+    #[ORM\Column(options: ["default" => false])]
+    private ?bool $fullScreenAlways = false;
 
 
     public function getId(): ?int
@@ -75,6 +78,18 @@ class Spotify
     public function setFullScreenOnSecond(?bool $fullScreenOnSecond): static
     {
         $this->fullScreenOnSecond = $fullScreenOnSecond;
+
+        return $this;
+    }
+
+    public function isFullScreenAlways(): ?bool
+    {
+        return $this->fullScreenAlways;
+    }
+
+    public function setFullScreenAlways(?bool $fullScreenAlways): static
+    {
+        $this->fullScreenAlways = $fullScreenAlways;
 
         return $this;
     }

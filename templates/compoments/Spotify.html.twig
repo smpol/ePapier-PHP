@@ -10,7 +10,7 @@
             {% if spotifyNowPlaying is not defined or spotifyNowPlaying.status == 'not_connected' %}
                 <p>Not Connected</p>
             {% elseif spotifyNowPlaying.status == 'not_playing' %}
-                <p>Aktualnie nic nie jest odtwarzane</p>
+                <p>Nothing is currently playing</p>
             {% else %}
                 {% if spotifyNowPlaying.error is defined %}
                     <h5>{{ spotifyNowPlaying.error }}</h5>
