@@ -10,7 +10,7 @@ services:
       - vendor_data:/app/vendor
       - var_data:/app/var
     ports:
-      - "8080:80"
+      - "8000:80"
     env_file:
       - .env
     environment:

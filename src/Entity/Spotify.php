@@ -22,6 +22,10 @@ class Spotify
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $expiresAt = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $fullScreenOnSecond = null;
+
+
     public function getId(): ?int
     {
         return $this->id;
@@ -59,6 +63,18 @@ class Spotify
     public function setRefreshToken(?string $refreshToken): static
     {
         $this->refreshToken = $refreshToken;
+
+        return $this;
+    }
+
+    public function isFullScreenOnSecond(): ?bool
+    {
+        return $this->fullScreenOnSecond;
+    }
+
+    public function setFullScreenOnSecond(?bool $fullScreenOnSecond): static
+    {
+        $this->fullScreenOnSecond = $fullScreenOnSecond;
 
         return $this;
     }

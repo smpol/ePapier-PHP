@@ -110,6 +110,19 @@ class SpotifyController extends AbstractController
         return $this->redirectToRoute('settings', ['tab' => 'spotify-settings']);
     }
 
+    #[Route('/save-spotify-settings', name: 'save-spotify-settings', methods: ['POST'])]
+    public function saveSpotifySettings(Request $request): RedirectResponse
+    {
+        $spotify = $this->em->getRepository(Spotify::class)->findOneBy([], ['id' => 'DESC']);
+        if ($spotify) {
+            $isFullScreen = $request->request->get('fullScreenOnSecond') === 'on';
+            $spotify->setFullScreenOnSecond($isFullScreen);
+            $this->em->flush();
+        }
+
+        return $this->redirectToRoute('settings', ['tab' => 'spotify-settings']);
+    }
+
     public function getPlayingNow(): ?array
     {
         return $this->spotifyService->getPlayingNow();

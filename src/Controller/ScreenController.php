@@ -158,6 +158,15 @@ class ScreenController extends AbstractController
             $entityManager->flush();
         }
 
+        $spotifySettings = $entityManager->getRepository(\App\Entity\Spotify::class)->findBy([], ['id' => 'DESC'], 1);
+        $isFullScreenEnabled = \count($spotifySettings) > 0 ? $spotifySettings[0]->isFullScreenOnSecond() : false;
+
+        if ($request->query->get('second') && $isFullScreenEnabled && $spotify && isset($spotify['status']) && $spotify['status'] === 'playing') {
+            return $this->render('spotify_fullscreen.html.twig', [
+                'spotifyNowPlaying' => $spotify,
+            ]);
+        }
+
         if (!$location && !$solarEdgeData && !$latestMail && !$spotify && !$getEvents) {
             $url = 'https://'.($request->query->get('ip') ?? $_SERVER['SERVER_NAME']).'/';
 

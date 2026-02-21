@@ -110,7 +110,7 @@ class SpotifyService
         $accessToken = $this->getAccessToken();
 
         if (!$accessToken) {
-            return null;
+            return ['status' => 'not_connected'];
         }
 
         $client = $this->httpClient;
@@ -127,29 +127,33 @@ class SpotifyService
                 
                 // Check if something is actually playing
                 if (!isset($data['item']) || !$data['is_playing']) {
-                    return null;
+                    return ['status' => 'not_playing'];
                 }
                 
                 $item = $data['item'];
                 
-                // Transform to format expected by Spotify.html.twig template
+                // Transform to format expected by Spotify.html.twig and spotify_fullscreen.html.twig
                 return [
+                    'status' => 'playing',
                     'title' => $item['name'] ?? 'Unknown Track',
                     'album' => $item['album']['name'] ?? 'Unknown Album',
                     'artists' => array_map(fn($artist) => $artist['name'], $item['artists'] ?? []),
+                    'image' => $item['album']['images'][0]['url'] ?? null,
+                    'duration_ms' => $item['duration_ms'] ?? 0,
+                    'progress_ms' => $data['progress_ms'] ?? 0,
                 ];
             }
 
             if (204 === $response->getStatusCode()) {
-                return null; // Nothing playing
+                return ['status' => 'not_playing']; // Nothing playing
             }
 
         } catch (\Exception $e) {
             error_log('Spotify API Error: ' . $e->getMessage());
-            return null;
+            return ['status' => 'not_connected'];
         }
 
-        return null;
+        return ['status' => 'not_playing'];
     }
 
     private function saveToken(array $data): void
