@@ -7,7 +7,7 @@
                 <div class="row g-1">
                     {% for forecast in weather.forecast_data|slice(0, isLarge ? 4 : 2) %}
                         <div class="{{ isLarge ? 'col-6' : 'col-12' }} mb-1">
-                            <div style="padding: 4px 0 3px; height: 100%; border-top: 1px solid #000;">
+                            <div style="padding: 4px 0 3px; height: 100%; border-bottom: 1px solid #000;">
                                 <div class="d-flex align-items-center justify-content-between" style="gap: 4px;">
                                     <strong class="event-summary" style="font-size: 15px; font-weight: 700;">{{ forecast.label }}</strong>
                                     <i class="wi {{ forecast.weather_code }} weather-icon" style="font-size: 18px;"></i>

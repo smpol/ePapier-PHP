@@ -5,7 +5,7 @@
             <h5 class="card-title">Solar Stats</h5>
             {% if solarData %}
                 <div style="display: grid; gap: 4px;">
-                    <div style="padding: 3px 0 4px; border-top: 1px solid #000; border-bottom: 2px solid #000;">
+                    <div style="padding: 3px 0 4px; border-bottom: 2px solid #000;">
                         <div class="muted" style="font-size: 13px; font-weight: 700; text-transform: uppercase;">Current Power</div>
                         <div class="mono" style="font-weight: 800; font-size: {{ isLarge ? '28px' : '22px' }}; line-height: 1;">
                             {% if solarData.overview.currentPower.power < 1 %}
