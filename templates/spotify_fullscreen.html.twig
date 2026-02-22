@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Player</title>
+    <!-- External fonts for modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* Base e-ink style - extremely high contrast, pure black and white */
+        :root {
+            --bg-color: #ffffff;
+            --text-main: #000000;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            width: 800px;
+            height: 480px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            position: relative;
+            /* Wymuszenie braku wygładzania na krawędziach tekstu dla większej ostrości na E-INK */
+            -webkit-font-smoothing: none; 
+        }
+
+        .player-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 30px;
+            width: 800px;
+            height: 480px;
+            padding: 40px;
+        }
+
+        .album-art-wrapper {
+            flex-shrink: 0;
+            width: 320px;
+            height: 320px;
+            border: 6px solid #000000;
+            /* Na ekranach E-INK lepiej wyglądają ostre kąty albo bardzo wyraźne zaokrąglenia bez anti-aliasingu */
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #000000;
+        }
+
+        .album-art {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Konwersja obrazu w czerń i biel + silny kontrast */
+            filter: grayscale(100%) contrast(150%) brightness(1.1);
+        }
+
+        .track-info-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-width: 370px;
+        }
+
+        .track-title {
+            font-size: 2.8rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-word;
+        }
+
+        .track-artist {
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 4px solid #000000;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Paski postępu */
+        .progress-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .queue-preview {
+            margin-top: 18px;
+            border-top: 2px solid #000000;
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .queue-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .queue-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            line-height: 1.1;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .queue-artists {
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.1;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 12px;
+            background-color: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #000000;
+        }
+
+        .progress-times {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-family: monospace;
+            font-weight: 700;
+        }
+
+        .spotify-logo {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2rem;
+            color: #000000;
+            z-index: 10;
+        }
+
+        .status-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 40px;
+            right: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            z-index: 10;
+            border-top: 2px solid #000000;
+            padding-top: 15px;
+        }
+
+        .status-time {
+            font-size: 2.2rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .status-weather {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    
+    <div class="spotify-logo">
+        <i class="fab fa-spotify"></i>
+    </div>
+
+    <div class="player-container">
+        <div class="album-art-wrapper">
+            {% if spotifyNowPlaying.image %}
+                <img src="{{ spotifyNowPlaying.image }}" alt="Album Art" class="album-art">
+            {% else %}
+                <div class="album-art"></div>
+            {% endif %}
+        </div>
+
+        <div class="track-info-container">
+            <h1 class="track-title">{{ spotifyNowPlaying.title }}</h1>
+            <p class="track-artist">
+                {% for artist in spotifyNowPlaying.artists %}
+                    {{ artist }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    {% set progressPercent = 0 %}
+                    {% if spotifyNowPlaying.duration_ms > 0 %}
+                        {% set progressPercent = (spotifyNowPlaying.progress_ms / spotifyNowPlaying.duration_ms) * 100 %}
+                    {% endif %}
+                    <div class="progress-bar-fill" style="width: {{ progressPercent }}%;"></div>
+                </div>
+                <div class="progress-times">
+                    {% set pm = (spotifyNowPlaying.progress_ms / 1000) // 60 %}
+                    {% set ps = ((spotifyNowPlaying.progress_ms / 1000) % 60) | round(0, 'floor') %}
+                    <span class="time-current">{{ "%02d:%02d"|format(pm, ps) }}</span>
+
+                    {% set dm = (spotifyNowPlaying.duration_ms / 1000) // 60 %}
+                    {% set ds = ((spotifyNowPlaying.duration_ms / 1000) % 60) | round(0, 'floor') %}
+                    <span class="time-total">{{ "%02d:%02d"|format(dm, ds) }}</span>
+                </div>
+            </div>
+
+            {% if spotifyNowPlaying.queue is defined and spotifyNowPlaying.queue|length > 0 %}
+                {% set nextTrack = spotifyNowPlaying.queue[0] %}
+                <div class="queue-preview">
+                    <div class="queue-label">Up Next</div>
+                    <div class="queue-title">{{ nextTrack.title }}</div>
+                    {% if nextTrack.artists is defined and nextTrack.artists|length > 0 %}
+                        <div class="queue-artists">
+                            {% for artist in nextTrack.artists %}
+                                {{ artist }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-time" id="current-time">
+            --:--
+        </div>
+        {% if weather and weather.current_weather %}
+            <div class="status-weather">
+                <i class="fas fa-thermometer-half"></i>
+                <span>{{ weather.current_weather.temperature|round(1) }}°C</span>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            // Simple manual UTC adjustment if needed, but let's try browser locale first
+            const options = { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: false,
+                timeZone: '{{ timeZone }}'
+            };
+            try {
+                const timeString = new Intl.DateTimeFormat('en-GB', options).format(now);
+                document.getElementById('current-time').textContent = timeString;
+            } catch (e) {
+                const clock = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+                document.getElementById('current-time').textContent = clock;
+            }
+        }
+        updateClock();
+        setInterval(updateClock, 60000);
+    </script>
+</body>
+</html>

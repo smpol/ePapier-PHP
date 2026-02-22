@@ -1,10 +1,14 @@
 <div class="col-md-4">
     <div class="card">
-        <div class="card-body text-center">
-            <h5 class="card-title">Current Time</h5>
-            <p style="font-size: 65px; margin: -20px;" class="card-text" id="current-time-only"></p>
-            <h5 class="card-text">Date</h5>
-            <p style="font-size: 35px; margin: -10px;" class="card-text" id="current-date-only"></p>
+        <div class="card-body">
+            {% set isLarge = (widgetSize|default('small')) == 'large' %}
+            <h5 class="card-title">Clock</h5>
+            <p class="card-text mono" id="current-time-only" style="font-size: {{ isLarge ? '50px' : '42px' }}; line-height: 1; font-weight: 700; margin: 2px 0 4px;"></p>
+            <span class="badge-outline">Date</span>
+            <p class="card-text mono" id="current-date-only" style="font-size: 24px; line-height: 1.05; margin-top: 4px;"></p>
+            {% if isLarge %}
+                <p class="muted" id="current-day-name" style="font-size: 12px; margin-top: 2px;"></p>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -33,6 +37,10 @@
         const dateParts = new Intl.DateTimeFormat('en-GB', dateOptions).formatToParts(now);
         const formattedDate = `${dateParts.find(p => p.type === 'day').value}.${dateParts.find(p => p.type === 'month').value}.${dateParts.find(p => p.type === 'year').value}`;
         document.getElementById('current-date-only').textContent = formattedDate;
+        const dayNameEl = document.getElementById('current-day-name');
+        if (dayNameEl) {
+            dayNameEl.textContent = new Intl.DateTimeFormat('en-GB', { weekday: 'long', timeZone: timeZoneOnly }).format(now);
+        }
     }
 
     setInterval(updateTimeAndDate, 1000);

@@ -50,25 +50,49 @@ Projekt można uruchomić na dwa sposoby:
 
 ### 1) Wersja produkcyjna (Docker)
 
-- Uruchom za pomocą komendy:
+Zoptymalizowana pod kątem Raspberry Pi, umożliwiająca szybkie aktualizacje bez długiego budowania obrazu.
 
-  ```bash
-  docker compose -f "compose.yaml" up -d --build production-server
-  ```
+**Uruchomienie (wystarczy):**
+```bash
+docker compose up -d
+```
 
-- Alternatywnie, utwórz obraz, a następnie kontener, udostępniając trzy porty:
-  - 80
-  - 443
-  - 443/udp
+Domyślnie zostanie uruchomiony serwis produkcyjny (`production-server`).
+
+**Pierwsze uruchomienie / po zmianach w obrazie (opcjonalnie):**
+```bash
+docker compose up -d --build production-server
+```
+
+**Szybka aktualizacja (Fast Update):**
+Jeśli zmienisz kod (np. `git pull`), nie musisz budować obrazu na nowo. Wystarczy zrestartować kontener:
+```bash
+git pull
+docker compose restart production-server
+```
+Skrypt startowy automatycznie wyczyści cache i zaktualizuje schemat bazy danych.
+
+**Czysty start (Fresh Start):**
+Aby postawić projekt od zera (wyczyścić bazę i zależności):
+```bash
+docker compose down -v
+rm -rf vendor/ var/
+docker compose up -d
+```
+
+**Wymuszenie przebudowania assetów:**
+```bash
+REBUILD_ASSETS=1 docker compose restart production-server
+```
 
 ### 2) Wersja deweloperska
 
 a) Wymagane jest zainstalowanie PHP oraz zależności poprzez Composer. W pliku `.env` należy wygenerować `ENCRYPTION_KEY` zgodnie z instrukcjami w `.env.example`.
 
-b) Uruchom serwer Symfony przy użyciu Docker Compose:
+b) Uruchom serwer deweloperski przy użyciu pliku `docker-compose.local.yml`:
 
 ```bash
-docker compose -f "compose.yaml" up -d --build development-server
+docker compose -f docker-compose.local.yml up -d --build php
 ```
 
 Zmienne środowiskowe dla wersji deweloperskiej powinny znajdować się w pliku `.env.dev`.

@@ -1,22 +1,30 @@
 <div class="col-md-4">
     <div class="card">
-        <div class="card-body text-center">
-            <h5 class="card-title">Solar Installation Statistics</h5>
+        <div class="card-body">
+            {% set isLarge = (widgetSize|default('small')) == 'large' %}
+            <h5 class="card-title">Solar Stats</h5>
             {% if solarData %}
-                <p class="card-text" style="font-size: 13px;">
-                    {% if solarData.overview.currentPower.power < 1 %}
-                        Current Power: {{ (solarData.overview.currentPower.power * 1000) | round(2) }} W<br/>
-                    {% else %}
-                        Current Power: {{ solarData.overview.currentPower.power | round(2) }} kW<br/>
-                    {% endif %}
-                    Today's Energy: {{ solarData.overview.lastDayData.energy | round(2) }} kWh<br/>
-                    This Month's Energy: {{ solarData.overview.lastMonthData.energy | round(2) }} kWh<br/>
-                    This Year's Energy: {{ solarData.overview.lastYearData.energy | round(2) }} kWh<br/>
-                </p>
+                <div style="display: grid; gap: 4px;">
+                    <div style="padding: 3px 0 4px; border-bottom: 2px solid #000;">
+                        <div class="muted" style="font-size: 13px; font-weight: 700; text-transform: uppercase;">Current Power</div>
+                        <div class="mono" style="font-weight: 800; font-size: {{ isLarge ? '28px' : '22px' }}; line-height: 1;">
+                            {% if solarData.overview.currentPower.power < 1 %}
+                                {{ (solarData.overview.currentPower.power * 1000) | round(0) }} W
+                            {% else %}
+                                {{ solarData.overview.currentPower.power | round(2) }} kW
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div style="font-size: {{ isLarge ? '16px' : '14px' }}; line-height: 1.2; font-weight: 600;">
+                        <div>Day <strong class="mono" style="font-weight: 700;">{{ solarData.overview.lastDayData.energy | round(1) }}</strong> kWh</div>
+                        <div>Month <strong class="mono" style="font-weight: 700;">{{ solarData.overview.lastMonthData.energy | round(0) }}</strong> kWh</div>
+                        {% if isLarge %}
+                            <div>Year <strong class="mono" style="font-weight: 700;">{{ solarData.overview.lastYearData.energy | round(0) }}</strong> kWh</div>
+                        {% endif %}
+                    </div>
+                </div>
             {% else %}
-                <p class="card-text">
-                    No data available.
-                </p>
+                <p class="card-text muted" style="font-size: 15px; font-weight: 600;">No data available.</p>
             {% endif %}
         </div>
     </div>

@@ -30,7 +30,7 @@ class SpotifyController extends AbstractController
     #[Route('/spotify-login', name: 'spotify-login')]
     public function spotifyLogin(Request $request): RedirectResponse
     {
-        $authorizationScope = 'user-read-currently-playing';
+        $authorizationScope = 'user-read-currently-playing user-read-playback-state';
         $authorizationUrl = 'https://accounts.spotify.com/authorize';
 
         // 1. Generate code_verifier
@@ -104,6 +104,21 @@ class SpotifyController extends AbstractController
             foreach ($spotify as $setting) {
                 $this->em->remove($setting);
             }
+            $this->em->flush();
+        }
+
+        return $this->redirectToRoute('settings', ['tab' => 'spotify-settings']);
+    }
+
+    #[Route('/save-spotify-settings', name: 'save-spotify-settings', methods: ['POST'])]
+    public function saveSpotifySettings(Request $request): RedirectResponse
+    {
+        $spotify = $this->em->getRepository(Spotify::class)->findOneBy([], ['id' => 'DESC']);
+        if ($spotify) {
+            $isFullScreen = $request->request->get('fullScreenOnSecond') === 'on';
+            $isFullScreenAlways = $request->request->get('fullScreenAlways') === 'on';
+            $spotify->setFullScreenOnSecond($isFullScreen);
+            $spotify->setFullScreenAlways($isFullScreenAlways);
             $this->em->flush();
         }
 

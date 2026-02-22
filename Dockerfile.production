@@ -3,16 +3,7 @@ FROM dunglas/frankenphp:php8.3-alpine
 ENV APP_ENV=prod \
     APP_DEBUG=0 \
     COMPOSER_ALLOW_SUPERUSER=1 \
-    DATABASE_URL="sqlite:////app/var/data.db" \
-    GOOGLE_CLIENT_ID= \
-    GOOGLE_PROJECT_ID= \
-    GOOGLE_AUTH_URI= \
-    GOOGLE_TOKEN_URI= \
-    GOOGLE_AUTH_PROVIDER_CERT_URL= \
-    GOOGLE_CLIENT_SECRET= \
-    SPOTIFY_CLIENT_ID= \
-    SPOTIFY_CLIENT_SECRET= \
-    REDIRECT_URL=
+    TZ=Europe/Warsaw
 
 WORKDIR /app
 
@@ -23,7 +14,10 @@ RUN set -eux; \
         intl \
         zip \
         opcache \
+        pdo_sqlite \
     ;
+
+RUN echo "date.timezone=Europe/Warsaw" >> /usr/local/etc/php/conf.d/docker-php-ext-date.ini
 
 # Copy only dependency files first (better caching)
 COPY composer.json composer.lock symfony.lock ./
@@ -53,6 +47,8 @@ RUN composer dump-autoload --no-dev --optimize --classmap-authoritative \
     && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Schema update moved to entrypoint (runs at container start, not build time)
+# Note: In production with volume mapping, we ensure /app/var is writable
+RUN mkdir -p var/db && chown -R www-data:www-data var && chmod -R 775 var
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]

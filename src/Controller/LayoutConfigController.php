@@ -24,16 +24,16 @@ class LayoutConfigController extends AbstractController
         $data = $entityManager->getRepository(Layout::class)->findAll();
 
         if (!$data) {
-            $defaultLayout = ['CurrentWeather', 'Forecast', 'Spotify', 'GoogleCalendar', 'Emails', 'AirQuality'];
+            $defaultLayout = ['CurrentWeather', 'Forecast', 'Spotify', 'GoogleCalendar', 'AirQuality'];
             foreach ($defaultLayout as $component) {
-                $layout = new Layout(); // Tworzymy nową instancję dla każdego komponentu
+                $layout = new Layout(); // Tworzymy nowĂ„â€¦ instancjĂ„â„˘ dla kaÄąÄ˝dego komponentu
                 $layout->setLayout($component, null);
                 $entityManager->persist($layout);
             }
             $entityManager->flush();
         }
 
-        $layout = $entityManager->getRepository(Layout::class)->findAll();
+        $layout = $entityManager->getRepository(Layout::class)->findBy([], ['id' => 'ASC']);
         $layoutMainArray = [];
         $layoutReplecmentArray = [];
         foreach ($layout as $item) {
@@ -41,35 +41,37 @@ class LayoutConfigController extends AbstractController
             $layoutReplecmentArray[] = $item->getReplacement();
         }
 
+        // Defensive limit: current screen layout is 5 slots max even if DB has stale extra rows.
+        $layoutMainArray = \array_slice($layoutMainArray, 0, 5);
+        $layoutReplecmentArray = \array_slice($layoutReplecmentArray, 0, 5);
+
         return $this->json(['layout' => $layoutMainArray, 'replacment' => $layoutReplecmentArray]);
     }
 
     #[Route('/set-layout', name: 'set-layout')]
     public function setLayout(EntityManagerInterface $entityManager)
     {
-        // Pobieramy dane z formularza POST z użyciem $this->request
+        // Pobieramy dane z formularza POST z uÄąÄ˝yciem $this->request
         $window1 = $this->request->request->get('component1');
         $window2 = $this->request->request->get('component2');
         $window3 = $this->request->request->get('component3');
         $window4 = $this->request->request->get('component4');
         $window5 = $this->request->request->get('component5');
-        $window6 = $this->request->request->get('component6');
 
         $replacment1 = $this->request->request->get('replacement1');
         $replacment2 = $this->request->request->get('replacement2');
         $replacment3 = $this->request->request->get('replacement3');
         $replacment4 = $this->request->request->get('replacement4');
         $replacment5 = $this->request->request->get('replacement5');
-        $replacment6 = $this->request->request->get('replacement6');
 
-        // Walidacja danych (można dodać bardziej zaawansowane reguły)
-        if (!$window1 || !$window2 || !$window3 || !$window4 || !$window5 || !$window6) {
-            return $this->json(['error' => 'Wszystkie pola muszą być wypełnione!'], Response::HTTP_BAD_REQUEST);
+        // Walidacja danych (moÄąÄ˝na dodaĂ„â€ˇ bardziej zaawansowane reguÄąâ€šy)
+        if (!$window1 || !$window2 || !$window3 || !$window4 || !$window5) {
+            return $this->json(['error' => 'Wszystkie pola muszĂ„â€¦ byĂ„â€ˇ wypeÄąâ€šnione!'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Tworzymy tablicę z wartościami okien
-        $layoutNew = [$window1, $window2, $window3, $window4, $window5, $window6];
-        $replacmentNew = [$replacment1, $replacment2, $replacment3, $replacment4, $replacment5, $replacment6];
+        // Tworzymy tablicĂ„â„˘ z wartoÄąâ€şciami okien
+        $layoutNew = [$window1, $window2, $window3, $window4, $window5];
+        $replacmentNew = [$replacment1, $replacment2, $replacment3, $replacment4, $replacment5];
 
         // Usuwamy wszystko z tabeli
         $layoutRepository = $entityManager->getRepository(Layout::class);
@@ -79,7 +81,7 @@ class LayoutConfigController extends AbstractController
         }
         $entityManager->flush();
 
-        // Zapisujemy nowe wartości
+        // Zapisujemy nowe wartoÄąâ€şci
         for ($i = 0; $i < count($layoutNew); ++$i) {
             $layoutEntity = new Layout();
             $layoutEntity->setLayout($layoutNew[$i], $replacmentNew[$i]);

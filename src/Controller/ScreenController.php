@@ -47,14 +47,21 @@ class ScreenController extends AbstractController
                 }
             }
         }
-        $countdown = $entityManager->getRepository(Countdown::class)->findBy([], ['date' => 'ASC']);
+        $allCountdowns = $entityManager->getRepository(Countdown::class)->findBy([], ['date' => 'ASC']);
+        $now = new \DateTime();
+        $futureCountdowns = array_filter($allCountdowns, fn($c) => $c->getDate() > $now);
+        $countdown = array_slice($futureCountdowns, 0, 2);
         $location = $entityManager->getRepository(Location::class)->find(1);
 
         $weatherData = $cache->get('weather_data', function (ItemInterface $item) use ($weatherService, $location, $cache) {
             if ($location) {
                 $item->expiresAfter(60);
+                $result = $weatherService->getWeatherData($location->getLat(), $location->getLon());
+                if (null === $result) {
+                    error_log('ScreenController weather_data null for location lat='.$location->getLat().' lon='.$location->getLon());
+                }
 
-                return $weatherService->getWeatherData($location->getLat(), $location->getLon());
+                return $result;
             } else {
                 if (isset($cache)) {
                     $cache->delete('weather_data');
@@ -155,6 +162,27 @@ class ScreenController extends AbstractController
             $entityManager->flush();
         }
 
+        $spotifySettings = $entityManager->getRepository(\App\Entity\Spotify::class)->findOneBy([], ['id' => 'DESC']);
+        $isFullScreenEnabled = $spotifySettings ? $spotifySettings->isFullScreenOnSecond() : false;
+        $isAlwaysFullScreen = $spotifySettings ? $spotifySettings->isFullScreenAlways() : false;
+
+        $shouldShowFullScreen = false;
+        if ($spotify && isset($spotify['status']) && $spotify['status'] === 'playing') {
+            if ($request->query->get('second') && $isFullScreenEnabled) {
+                $shouldShowFullScreen = true;
+            } elseif ($isAlwaysFullScreen) {
+                $shouldShowFullScreen = true;
+            }
+        }
+
+        if ($shouldShowFullScreen) {
+            return $this->render('spotify_fullscreen.html.twig', [
+                'spotifyNowPlaying' => $spotify,
+                'weather' => $weatherData,
+                'timeZone' => $timeZone->getTimezone(),
+            ]);
+        }
+
         if (!$location && !$solarEdgeData && !$latestMail && !$spotify && !$getEvents) {
             $url = 'https://'.($request->query->get('ip') ?? $_SERVER['SERVER_NAME']).'/';
 
@@ -175,7 +203,7 @@ class ScreenController extends AbstractController
                 'events' => $getEvents,
                 'layout' => $layout,
                 'airQuality' => $airQuality,
-                'countdown' => array_slice($countdown, 0, 2),
+                'countdown' => $countdown,
                 'timeZone' => $timeZone->getTimezone(),
             ]);
         }

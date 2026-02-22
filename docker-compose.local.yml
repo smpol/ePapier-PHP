@@ -1,0 +1,24 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    volumes:
+      # Code mapping for hot-reload
+      - .:/app:delegated # 'delegated' improves performance on Mac
+      # Use named volumes for heavy directories to avoid Mac volume slowness
+      - vendor_data:/app/vendor
+      - var_data:/app/var
+    ports:
+      - "8000:80"
+    env_file:
+      - .env
+    environment:
+      - TZ=Europe/Warsaw
+      - APP_ENV=dev
+      - APP_DEBUG=1 # Keep debug=1 to see errors if they happen, but env is prod
+      - DATABASE_URL=sqlite:////app/var/data.db
+
+volumes:
+  vendor_data:
+  var_data:
