@@ -5,13 +5,13 @@
             <h5 class="card-title">Now</h5>
             <div class="d-flex align-items-end justify-content-between" style="gap: 8px; margin: 2px 0 6px;">
                 <p class="card-text mono mb-0" id="current-time" style="font-size: {{ isLarge ? '58px' : '44px' }}; line-height: 0.95; font-weight: 700; margin: 0;"></p>
-                <p class="muted mono mb-0" id="current-date" style="font-size: {{ isLarge ? '18px' : '16px' }}; margin: 0 0 6px; text-transform: uppercase; white-space: nowrap; font-weight: 700;"></p>
+                <p class="muted mono mb-0" id="current-date" style="font-size: {{ isLarge ? '18px' : '18px' }}; margin: 0 0 6px; text-transform: uppercase; white-space: nowrap; font-weight: 700;"></p>
             </div>
             <span class="badge-outline">Current Temperature</span>
             {% if weather %}
                 <div class="d-flex align-items-center justify-content-center" style="gap: 8px; margin-top: 2px;">
-                    <h3 class="card-text mb-0" style="font-size: {{ isLarge ? '34px' : '30px' }}; font-weight: 700; line-height: 1;">{{ weather.current_weather.temperature|round(1) }}&deg;C</h3>
-                    <i class="wi weather-icon {{ weather.current_weather.icon }}" style="font-size: {{ isLarge ? '34px' : '30px' }};"></i>
+                    <h3 class="card-text mb-0" style="font-size: {{ isLarge ? '34px' : '21px' }}; font-weight: 700; line-height: 1;">{{ weather.current_weather.temperature|round(1) }}&deg;C</h3>
+                    <i class="wi weather-icon {{ weather.current_weather.icon }}" style="font-size: {{ isLarge ? '34px' : '31px' }};"></i>
                 </div>
                 {% if isLarge and weather.current_weather.wind_speed is defined %}
                     <p class="muted" style="font-size: 16px; font-weight: 600; margin-top: 2px;">Wind {{ weather.current_weather.wind_speed|round(1) }} km/h</p>
