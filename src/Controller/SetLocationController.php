@@ -14,8 +14,8 @@ class SetLocationController extends AbstractController
     #[Route('/set-location', name: 'set-location')]
     public function setLocation(Request $request, EntityManagerInterface $entityManager)
     {
-        $lat = $request->request->get('latitude');
-        $lng = $request->request->get('longitude');
+        $lat = trim((string) $request->request->get('latitude', ''));
+        $lng = trim((string) $request->request->get('longitude', ''));
 
         $location = $entityManager->getRepository(Location::class)->find(1);
         if (!$location) {

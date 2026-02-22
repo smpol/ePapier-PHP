@@ -19,6 +19,9 @@ class WeatherService
 
     public function getAirQuality(float $lat, float $lng): ?array
     {
+        $lat = $this->normalizeCoordinate($lat);
+        $lng = $this->normalizeCoordinate($lng);
+
         try {
             $response = $this->httpClient->request(
                 'GET',
@@ -51,6 +54,9 @@ class WeatherService
 
     public function getWeatherData($lat, $lng): ?array
     {
+        $lat = $this->normalizeCoordinate($lat);
+        $lng = $this->normalizeCoordinate($lng);
+
         try {
             $response = $this->httpClient->request(
                 'GET',
@@ -204,5 +210,14 @@ class WeatherService
         }
 
         return $forecast;
+    }
+
+    private function normalizeCoordinate($value): float
+    {
+        if (is_string($value)) {
+            $value = trim($value);
+        }
+
+        return (float) $value;
     }
 }
