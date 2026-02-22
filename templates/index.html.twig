@@ -31,7 +31,7 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            font-size: 16px;
+            font-size: 17px;
             color: var(--ink);
             background: var(--paper);
             -webkit-font-smoothing: none;
@@ -106,7 +106,7 @@
         .screen-slot h6.card-title {
             color: var(--ink);
             margin: 0 0 4px 0;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -117,7 +117,7 @@
 
         .screen-slot--1 .card-title,
         .screen-slot--2 .card-title {
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .screen-slot .card-text,
@@ -161,7 +161,7 @@
         }
 
         .screen-slot .list-unstyled li {
-            padding: 2px 0;
+            padding: 3px 0;
         }
 
         .screen-slot hr {
@@ -180,7 +180,7 @@
         }
 
         .weather-icon {
-            font-size: 24px;
+            font-size: 28px;
             color: var(--ink);
         }
 
@@ -203,13 +203,30 @@
             border-bottom: 1px solid var(--line);
             border-radius: 0;
             padding: 0 0 1px 0;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.06em;
             display: inline-block;
             line-height: 1.1;
             width: fit-content;
+        }
+
+        .screen-slot .progress-track {
+            width: 100%;
+            height: 8px;
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+            position: relative;
+            margin-top: 2px;
+        }
+
+        .screen-slot .progress-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            background: #000;
         }
     </style>
 </head>

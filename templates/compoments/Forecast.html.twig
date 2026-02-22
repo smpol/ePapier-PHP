@@ -9,15 +9,15 @@
                         <div class="{{ isLarge ? 'col-6' : 'col-12' }} mb-1">
                             <div style="padding: 4px 0 3px; height: 100%; border-top: 1px solid #000;">
                                 <div class="d-flex align-items-center justify-content-between" style="gap: 4px;">
-                                    <strong class="event-summary" style="font-size: 14px; font-weight: 700;">{{ forecast.label }}</strong>
+                                    <strong class="event-summary" style="font-size: 15px; font-weight: 700;">{{ forecast.label }}</strong>
                                     <i class="wi {{ forecast.weather_code }} weather-icon" style="font-size: 18px;"></i>
                                 </div>
-                                <p class="mb-0" style="font-size: 13px; line-height: 1.15;">
+                                <p class="mb-0" style="font-size: 14px; line-height: 1.15; font-weight: 600;">
                                     <span class="mono">{{ forecast.temperature_max|round(0, 'floor') }}&deg;</span> /
                                     <span class="mono muted">{{ forecast.temperature_min|round(0, 'floor') }}&deg;</span>
                                 </p>
                                 {% if isLarge %}
-                                    <p class="mb-0 muted" style="font-size: 12px; line-height: 1.1;">Rain {{ forecast.precipitation_probability }}%</p>
+                                    <p class="mb-0 muted" style="font-size: 13px; line-height: 1.1; font-weight: 600;">Rain {{ forecast.precipitation_probability }}%</p>
                                 {% endif %}
                             </div>
                         </div>

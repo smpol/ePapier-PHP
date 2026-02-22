@@ -7,8 +7,8 @@
                 {% if events %}
                     {% for event in events|slice(0, isLarge ? 4 : 2) %}
                         <li>
-                            <strong class="event-summary" style="font-size: 14px; font-weight: 700;">{{ event.summary }}</strong><br/>
-                            <small class="mono muted" style="font-size: 13px;">{{ event.start | date('d-m-Y H:i') }}</small>
+                            <strong class="event-summary" style="font-size: 15px; font-weight: 700;">{{ event.summary }}</strong><br/>
+                            <small class="mono muted" style="font-size: 14px; font-weight: 600;">{{ event.start | date('d-m-Y H:i') }}</small>
                         </li>
                         {% if not loop.last %}
                             <hr/>
