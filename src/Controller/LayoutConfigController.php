@@ -33,13 +33,17 @@ class LayoutConfigController extends AbstractController
             $entityManager->flush();
         }
 
-        $layout = $entityManager->getRepository(Layout::class)->findAll();
+        $layout = $entityManager->getRepository(Layout::class)->findBy([], ['id' => 'ASC']);
         $layoutMainArray = [];
         $layoutReplecmentArray = [];
         foreach ($layout as $item) {
             $layoutMainArray[] = $item->getMain();
             $layoutReplecmentArray[] = $item->getReplacement();
         }
+
+        // Defensive limit: screen/settings layout is 6 slots max even if DB has stale extra rows.
+        $layoutMainArray = \array_slice($layoutMainArray, 0, 6);
+        $layoutReplecmentArray = \array_slice($layoutReplecmentArray, 0, 6);
 
         return $this->json(['layout' => $layoutMainArray, 'replacment' => $layoutReplecmentArray]);
     }

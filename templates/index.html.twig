@@ -216,7 +216,7 @@
 <body>
 <div class="screen-shell">
     <div class="screen-grid">
-        {% for component in layout %}
+        {% for component in layout|slice(0, 6) %}
             {% set widgetSize = loop.index <= 2 ? 'large' : 'small' %}
             <div class="screen-slot screen-slot--{{ loop.index }}">
                 {% include 'compoments/' ~ component ~ '.html.twig' with ({
