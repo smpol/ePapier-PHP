@@ -370,12 +370,46 @@
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ path('set-layout') }}">
+                        <div class="alert alert-secondary py-2 mb-3" style="border-radius: 0;">
+                            <strong>Screen layout now uses 5 widgets:</strong> slots 1-2 are large (top row), slots 3-5 are smaller (bottom row).
+                        </div>
+
+                        <div class="mb-4 p-3 border rounded-0 bg-light" style="border-color: var(--border-color) !important;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label-premium small text-uppercase mb-0">Live Layout Preview</label>
+                                <span class="form-text mt-0">2 large top slots + 3 compact bottom slots</span>
+                            </div>
+                            <div id="layout-preview" style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 8px; height: 180px; background: #fff; border: 1px dashed var(--border-color); padding: 8px;">
+                                <div id="preview-slot-1" class="layout-preview-slot" data-slot="1" style="grid-column: 1 / span 6; grid-row: 1 / span 2; border: 1px solid var(--border-color); background: #fff; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div class="small text-uppercase text-muted fw-bold">Slot 1 · Large</div>
+                                    <div class="preview-slot-label fw-semibold">Not set</div>
+                                </div>
+                                <div id="preview-slot-2" class="layout-preview-slot" data-slot="2" style="grid-column: 7 / span 6; grid-row: 1 / span 2; border: 1px solid var(--border-color); background: #fff; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div class="small text-uppercase text-muted fw-bold">Slot 2 · Large</div>
+                                    <div class="preview-slot-label fw-semibold">Not set</div>
+                                </div>
+                                <div id="preview-slot-3" class="layout-preview-slot" data-slot="3" style="grid-column: 1 / span 4; grid-row: 3 / span 2; border: 1px solid var(--border-color); background: #fff; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div class="small text-uppercase text-muted fw-bold">Slot 3 · Compact</div>
+                                    <div class="preview-slot-label fw-semibold">Not set</div>
+                                </div>
+                                <div id="preview-slot-4" class="layout-preview-slot" data-slot="4" style="grid-column: 5 / span 4; grid-row: 3 / span 2; border: 1px solid var(--border-color); background: #fff; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div class="small text-uppercase text-muted fw-bold">Slot 4 · Compact</div>
+                                    <div class="preview-slot-label fw-semibold">Not set</div>
+                                </div>
+                                <div id="preview-slot-5" class="layout-preview-slot" data-slot="5" style="grid-column: 9 / span 4; grid-row: 3 / span 2; border: 1px solid var(--border-color); background: #fff; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div class="small text-uppercase text-muted fw-bold">Slot 5 · Compact</div>
+                                    <div class="preview-slot-label fw-semibold">Not set</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div id="dashboard-grid" class="row g-3 mb-4">
-                            {% for i in 0..5 %}
-                                <div class="col-md-6 col-xl-4">
+                            {% for i in 0..4 %}
+                                <div class="col-md-6 {% if i < 2 %}col-xl-6{% else %}col-xl-4{% endif %}">
                                     <div class="p-3 border rounded-0 bg-light h-100" style="border-color: var(--border-color) !important;">
                                         <div class="mb-3">
                                             <label class="form-label-premium small text-uppercase">Slot {{ i + 1 }}</label>
+                                            <div class="form-text mb-2 mt-0">{% if i < 2 %}Large widget{% else %}Compact widget{% endif %}</div>
                                             <select class="form-select form-control-premium component-select-input" name="component{{ i + 1 }}" required>
                                                 <option value="">Select component</option>
                                                 {% for key, name in availableComponents %}
@@ -510,6 +544,23 @@
             });
         }
 
+        function updateLayoutPreview() {
+            const mainSelects = document.querySelectorAll('.component-select-input');
+            mainSelects.forEach((select, index) => {
+                const slotNumber = index + 1;
+                const slotEl = document.getElementById(`preview-slot-${slotNumber}`);
+                if (!slotEl) return;
+
+                const labelEl = slotEl.querySelector('.preview-slot-label');
+                const selectedOption = select.options[select.selectedIndex];
+                const selectedText = selectedOption && select.value ? selectedOption.textContent.trim() : 'Not set';
+
+                if (labelEl) {
+                    labelEl.textContent = selectedText;
+                }
+            });
+        }
+
         function validateForm() {
             const mainSelects = document.querySelectorAll('.component-select-input');
             const replacementSelects = document.querySelectorAll('.replacement-select-input');
@@ -531,11 +582,13 @@
         }
 
         updateSelectOptions();
+        updateLayoutPreview();
 
         dashboardGrid.addEventListener('change', function (e) {
             if (e.target.classList.contains('component-select-input') || e.target.classList.contains('replacement-select-input')) {
                 updateSelectOptions();
                 validateForm();
+                updateLayoutPreview();
             }
         });
 
@@ -544,6 +597,7 @@
                 document.querySelectorAll('.component-select-input, .replacement-select-input').forEach(select => select.value = '');
                 updateSelectOptions();
                 validateForm();
+                updateLayoutPreview();
             }
         });
     });

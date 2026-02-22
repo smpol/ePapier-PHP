@@ -4,13 +4,13 @@
             {% set isLarge = (widgetSize|default('small')) == 'large' %}
             <h5 class="card-title">Now</h5>
             <div class="d-flex align-items-end justify-content-between" style="gap: 8px; margin: 2px 0 6px;">
-                <p class="card-text mono mb-0" id="current-time" style="font-size: {{ isLarge ? '54px' : '42px' }}; line-height: 0.95; font-weight: 800; margin: 0;"></p>
-                <p class="muted mono mb-0" id="current-date" style="font-size: {{ isLarge ? '14px' : '12px' }}; margin: 0 0 4px; text-transform: uppercase; white-space: nowrap;"></p>
+                <p class="card-text mono mb-0" id="current-time" style="font-size: {{ isLarge ? '52px' : '39px' }}; line-height: 0.95; font-weight: 700; margin: 0;"></p>
+                <p class="muted mono mb-0" id="current-date" style="font-size: {{ isLarge ? '15px' : '12px' }}; margin: 0 0 4px; text-transform: uppercase; white-space: nowrap;"></p>
             </div>
             <span class="badge-outline">Current Temperature</span>
             {% if weather %}
                 <div class="d-flex align-items-center justify-content-center" style="gap: 8px; margin-top: 2px;">
-                    <h3 class="card-text mb-0" style="font-size: {{ isLarge ? '28px' : '22px' }}; font-weight: 800;">{{ weather.current_weather.temperature|round(1) }}&deg;C</h3>
+                    <h3 class="card-text mb-0" style="font-size: {{ isLarge ? '27px' : '22px' }}; font-weight: 700;">{{ weather.current_weather.temperature|round(1) }}&deg;C</h3>
                     <i class="wi weather-icon {{ weather.current_weather.icon }}"></i>
                 </div>
                 {% if isLarge and weather.current_weather.wind_speed is defined %}
