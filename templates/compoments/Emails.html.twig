@@ -13,12 +13,12 @@
                     <h6 class="mt-1 mb-0" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">Latest</h6>
                     <ul class="list-unstyled">
                         <li>
-                            <strong class="event-summary" style="font-size: 12px;">{{ latestMail.subject }}</strong><br/>
+                            <strong class="event-summary" style="font-size: 14px; font-weight: 700;">{{ latestMail.subject }}</strong><br/>
                             {% if isLarge %}
-                                <small class="event-summary muted">From: {{ latestMail.from }}</small><br/>
-                                <small class="mono muted">{{ latestMail.date }}</small>
+                                <small class="event-summary muted" style="font-size: 13px;">From: {{ latestMail.from }}</small><br/>
+                                <small class="mono muted" style="font-size: 12px;">{{ latestMail.date }}</small>
                             {% else %}
-                                <small class="event-summary muted">{{ latestMail.from }}</small>
+                                <small class="event-summary muted" style="font-size: 13px;">{{ latestMail.from }}</small>
                             {% endif %}
                         </li>
                     </ul>

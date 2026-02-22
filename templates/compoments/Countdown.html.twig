@@ -4,10 +4,12 @@
             {% set isLarge = (widgetSize|default('small')) == 'large' %}
             <h5 class="card-title">Countdown</h5>
             {% if countdown %}
-                {% for event in countdown|slice(0, isLarge ? 2 : 1) %}
+                {% for event in countdown|slice(0, 2) %}
                     <div style="padding: 4px 0 3px; margin-bottom: {{ loop.last ? '0' : '4px' }}; border-top: 1px solid #000;">
-                        <div class="event-summary" style="font-weight: 800; font-size: 12px;">{{ event.description }}</div>
-                        <div class="card-text mb-0 event-summary mono" id="countdown-timer-{{ loop.index }}" style="font-size: 13px;"></div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                            <div class="event-summary" style="font-weight: 700; font-size: 14px;">{{ event.description }}</div>
+                            <div class="card-text mb-0 event-summary mono" id="countdown-timer-{{ loop.index }}" style="font-size: 15px; font-weight: 700;"></div>
+                        </div>
                     </div>
                     <script>
                         const countdownDate{{ loop.index }} = new Date("{{ event.date|date('Y-m-d H:i:s') }}").getTime();
