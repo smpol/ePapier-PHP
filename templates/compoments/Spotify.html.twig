@@ -28,23 +28,6 @@
                     </div>
                     {% if isLarge %}
                         <div style="font-size: 16px; line-height: 1.1; font-weight: 600; white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">{{ spotifyNowPlaying.album }}</div>
-
-                        {% if spotifyNowPlaying.duration_ms is defined and spotifyNowPlaying.duration_ms > 0 and spotifyNowPlaying.progress_ms is defined %}
-                            {% set progressPercent = (spotifyNowPlaying.progress_ms / spotifyNowPlaying.duration_ms) * 100 %}
-                            <div style="margin-top: 4px;">
-                                <div class="progress-track">
-                                    <div class="progress-fill" style="width: {{ progressPercent }}%;"></div>
-                                </div>
-                                <div class="d-flex justify-content-between" style="margin-top: 3px; font-size: 12px; font-weight: 700;">
-                                    {% set pm = (spotifyNowPlaying.progress_ms / 1000) // 60 %}
-                                    {% set ps = ((spotifyNowPlaying.progress_ms / 1000) % 60) | round(0, 'floor') %}
-                                    {% set dm = (spotifyNowPlaying.duration_ms / 1000) // 60 %}
-                                    {% set ds = ((spotifyNowPlaying.duration_ms / 1000) % 60) | round(0, 'floor') %}
-                                    <span class="mono">{{ "%02d:%02d"|format(pm, ps) }}</span>
-                                    <span class="mono">{{ "%02d:%02d"|format(dm, ds) }}</span>
-                                </div>
-                            </div>
-                        {% endif %}
                     {% elseif spotifyNowPlaying.album is defined %}
                         <div style="font-size: 13px; line-height: 1.1; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ spotifyNowPlaying.album }}</div>
                     {% endif %}
