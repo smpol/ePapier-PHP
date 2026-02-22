@@ -133,7 +133,7 @@ class SpotifyService
                 $item = $data['item'];
                 
                 // Transform to format expected by Spotify.html.twig and spotify_fullscreen.html.twig
-                return [
+                $result = [
                     'status' => 'playing',
                     'title' => $item['name'] ?? 'Unknown Track',
                     'album' => $item['album']['name'] ?? 'Unknown Album',
@@ -142,6 +142,14 @@ class SpotifyService
                     'duration_ms' => $item['duration_ms'] ?? 0,
                     'progress_ms' => $data['progress_ms'] ?? 0,
                 ];
+
+                $queueData = $this->getQueue($accessToken);
+                if ($queueData) {
+                    $result['queue'] = $queueData['queue'] ?? [];
+                    $result['queue_count'] = count($result['queue']);
+                }
+
+                return $result;
             }
 
             if (204 === $response->getStatusCode()) {
@@ -154,6 +162,54 @@ class SpotifyService
         }
 
         return ['status' => 'not_playing'];
+    }
+
+    private function getQueue(string $accessToken): ?array
+    {
+        try {
+            $response = $this->httpClient->request('GET', 'https://api.spotify.com/v1/me/player/queue', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                ],
+            ]);
+
+            if (200 !== $response->getStatusCode()) {
+                return null;
+            }
+
+            $data = $response->toArray(false);
+            if (!isset($data['queue']) || !is_array($data['queue'])) {
+                return ['queue' => []];
+            }
+
+            $queue = [];
+            foreach (array_slice($data['queue'], 0, 3) as $entry) {
+                if (!is_array($entry)) {
+                    continue;
+                }
+
+                $artists = [];
+                if (isset($entry['artists']) && is_array($entry['artists'])) {
+                    $artists = array_values(array_filter(array_map(
+                        fn($artist) => is_array($artist) ? ($artist['name'] ?? null) : null,
+                        $entry['artists']
+                    )));
+                }
+
+                $queue[] = [
+                    'title' => $entry['name'] ?? 'Unknown',
+                    'artists' => $artists,
+                    'type' => $entry['type'] ?? null,
+                ];
+            }
+
+            return ['queue' => $queue];
+        } catch (\Exception $e) {
+            // Queue is optional - don't break currently playing widget if endpoint fails/scopes missing.
+            error_log('Spotify Queue API Error: ' . $e->getMessage());
+
+            return null;
+        }
     }
 
     private function saveToken(array $data): void

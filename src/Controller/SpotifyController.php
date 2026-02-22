@@ -30,7 +30,7 @@ class SpotifyController extends AbstractController
     #[Route('/spotify-login', name: 'spotify-login')]
     public function spotifyLogin(Request $request): RedirectResponse
     {
-        $authorizationScope = 'user-read-currently-playing';
+        $authorizationScope = 'user-read-currently-playing user-read-playback-state';
         $authorizationUrl = 'https://accounts.spotify.com/authorize';
 
         // 1. Generate code_verifier

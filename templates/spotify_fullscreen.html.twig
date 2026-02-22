@@ -112,6 +112,42 @@
             gap: 10px;
         }
 
+        .queue-preview {
+            margin-top: 18px;
+            border-top: 2px solid #000000;
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .queue-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .queue-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            line-height: 1.1;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .queue-artists {
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.1;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
         .progress-bar-bg {
             width: 100%;
             height: 12px;
@@ -213,6 +249,21 @@
                     <span class="time-total">{{ "%02d:%02d"|format(dm, ds) }}</span>
                 </div>
             </div>
+
+            {% if spotifyNowPlaying.queue is defined and spotifyNowPlaying.queue|length > 0 %}
+                {% set nextTrack = spotifyNowPlaying.queue[0] %}
+                <div class="queue-preview">
+                    <div class="queue-label">Up Next</div>
+                    <div class="queue-title">{{ nextTrack.title }}</div>
+                    {% if nextTrack.artists is defined and nextTrack.artists|length > 0 %}
+                        <div class="queue-artists">
+                            {% for artist in nextTrack.artists %}
+                                {{ artist }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </div>
 

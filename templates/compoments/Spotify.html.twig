@@ -31,6 +31,28 @@
                     {% elseif spotifyNowPlaying.album is defined %}
                         <div style="font-size: 13px; line-height: 1.1; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ spotifyNowPlaying.album }}</div>
                     {% endif %}
+
+                    {% if spotifyNowPlaying.queue is defined and spotifyNowPlaying.queue|length > 0 %}
+                        {% if isLarge %}
+                            <div style="margin-top: 4px; border-top: 1px solid #000; padding-top: 4px;">
+                                <div class="badge-outline" style="margin-bottom: 2px;">Up Next</div>
+                                {% set nextItem = spotifyNowPlaying.queue[0] %}
+                                <div>
+                                    <div class="event-summary" style="font-size: 14px; font-weight: 700;">{{ nextItem.title }}</div>
+                                    <div class="event-summary" style="font-size: 12px; font-weight: 600;">
+                                        {% for artist in nextItem.artists %}
+                                            {{ artist }}{% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div style="margin-top: 4px; border-top: 1px solid #000; padding-top: 4px;">
+                                <span class="badge-outline">Next</span>
+                                <div class="event-summary" style="display: block; margin-top: 2px; font-size: 13px; font-weight: 700;">{{ spotifyNowPlaying.queue[0].title }}</div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
                 {% endif %}
             {% endif %}
         </div>
