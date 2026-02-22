@@ -24,6 +24,10 @@ class WeatherService
                 'GET',
                 'https://air-quality-api.open-meteo.com/v1/air-quality',
                 [
+                    'headers' => [
+                        'User-Agent' => 'ePapier/1.0',
+                        'Accept' => 'application/json',
+                    ],
                     'query' => [
                         'latitude' => $lat,
                         'longitude' => $lng,
@@ -52,6 +56,10 @@ class WeatherService
                 'GET',
                 'https://api.open-meteo.com/v1/forecast',
                 [
+                    'headers' => [
+                        'User-Agent' => 'ePapier/1.0',
+                        'Accept' => 'application/json',
+                    ],
                     'query' => [
                         'latitude' => $lat,
                         'longitude' => $lng,
