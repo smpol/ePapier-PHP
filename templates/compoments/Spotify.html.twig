@@ -18,32 +18,26 @@
                             <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m3.669 11.538a.5.5 0 0 1-.686.165c-1.879-1.147-4.243-1.407-7.028-.77a.499.499 0 0 1-.222-.973c3.048-.696 5.662-.397 7.77.892a.5.5 0 0 1 .166.686m.979-2.178a.624.624 0 0 1-.858.205c-2.15-1.321-5.428-1.704-7.972-.932a.625.625 0 0 1-.362-1.194c2.905-.881 6.517-.454 8.986 1.063a.624.624 0 0 1 .206.858m.084-2.268C10.154 5.56 5.9 5.419 3.438 6.166a.748.748 0 1 1-.434-1.432c2.825-.857 7.523-.692 10.492 1.07a.747.747 0 1 1-.764 1.288"></path>
                         </svg>
                     </div>
-                    <h5 class="mb-0" style="font-size: {{ isLarge ? '24px' : '17px' }}; font-weight: 700; line-height: 1.08; margin-top: 2px;">
+                    <h5 class="mb-0" style="font-size: {{ isLarge ? '22px' : '17px' }}; font-weight: 700; line-height: 1.12; margin-top: 2px;">
                         {{ spotifyNowPlaying.title }}
                     </h5>
-                    <div class="muted" style="font-size: {{ isLarge ? '18px' : '14px' }}; line-height: 1.2; padding-bottom: 2px; font-weight: 700; white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                    <div class="muted" style="font-size: {{ isLarge ? '17px' : '14px' }}; line-height: 1.32; padding-bottom: {{ isLarge ? '5px' : '2px' }}; margin-bottom: {{ isLarge ? '3px' : '0' }}; font-weight: 700; white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                         {% for artist in spotifyNowPlaying.artists %}
                             {{ artist }}{% if not loop.last %}, {% endif %}
                         {% endfor %}
                     </div>
                     {% if isLarge %}
-                        <div style="font-size: 16px; line-height: 1.1; font-weight: 600; white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">{{ spotifyNowPlaying.album }}</div>
+                        <div style="font-size: 15px; line-height: 1.15; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ spotifyNowPlaying.album }}</div>
                     {% elseif spotifyNowPlaying.album is defined %}
                         <div style="font-size: 13px; line-height: 1.1; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ spotifyNowPlaying.album }}</div>
                     {% endif %}
 
                     {% if spotifyNowPlaying.queue is defined and spotifyNowPlaying.queue|length > 0 %}
                         {% if isLarge %}
-                            <div style="margin-top: 4px; border-top: 1px solid #000; padding-top: 4px;">
-                                <div class="badge-outline" style="margin-bottom: 2px;">Up Next</div>
+                            <div style="border-top: 1px solid #000; margin-top: 2px; padding-top: 2px;">
                                 {% set nextItem = spotifyNowPlaying.queue[0] %}
-                                <div>
-                                    <div class="event-summary" style="font-size: 14px; font-weight: 700;">{{ nextItem.title }}</div>
-                                    <div class="event-summary" style="font-size: 12px; font-weight: 600;">
-                                        {% for artist in nextItem.artists %}
-                                            {{ artist }}{% if not loop.last %}, {% endif %}
-                                        {% endfor %}
-                                    </div>
+                                <div style="font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    <span style="border-bottom: 1px solid #000; padding-bottom: 1px;">Up Next</span>: {{ nextItem.title }}{% if nextItem.artists is defined and nextItem.artists|length > 0 %} - {{ nextItem.artists|join(', ') }}{% endif %}
                                 </div>
                             </div>
                         {% else %}
