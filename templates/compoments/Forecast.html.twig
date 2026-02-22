@@ -1,26 +1,30 @@
 <div class="col-md-4">
     <div class="card">
-        <div class="card-body text-center">
-            <h5 class="card-title" style="margin-bottom: 1px">Forecast</h5>
+        <div class="card-body">
+            {% set isLarge = (widgetSize|default('small')) == 'large' %}
+            <h5 class="card-title">Forecast</h5>
             {% if weather %}
-                <div class="row" style="margin-bottom: 1px">
-                    {% for forecast in weather.forecast_data %}
-                        <div class="col-6 mb-2" style="margin-bottom: 3px">
-                            <h4 style=" margin-bottom: 2px">
-                                {{ forecast.label }}
-                            </h4>
-                            <p style="font-size: 15px; margin-bottom: 2px"><b>
-                                Max: {{ forecast.temperature_max }}°C<br>
-                                Min: {{ forecast.temperature_min }}°C
-                                </b></p>
-                            <p style="font-size: 11px; margin-bottom: 2px"><b>
-                                Precipitation: {{ forecast.precipitation_probability }}%</b>
-                                <i class="wi {{ forecast.weather_code }} weather-icon ms-2"></i>
+                <div class="row g-1">
+                    {% for forecast in weather.forecast_data|slice(0, isLarge ? 4 : 2) %}
+                        <div class="{{ isLarge ? 'col-6' : 'col-12' }} mb-1">
+                            <div style="padding: 4px 0 3px; height: 100%; border-top: 1px solid #000;">
+                                <div class="d-flex align-items-center justify-content-between" style="gap: 4px;">
+                                    <strong class="event-summary" style="font-size: 12px;">{{ forecast.label }}</strong>
+                                    <i class="wi {{ forecast.weather_code }} weather-icon" style="font-size: 16px;"></i>
+                                </div>
+                                <p class="mb-0" style="font-size: 11px; line-height: 1.15;">
+                                    <span class="mono">{{ forecast.temperature_max|round(0, 'floor') }}&deg;</span> /
+                                    <span class="mono muted">{{ forecast.temperature_min|round(0, 'floor') }}&deg;</span>
+                                </p>
+                                {% if isLarge %}
+                                    <p class="mb-0 muted" style="font-size: 10px; line-height: 1.1;">Rain {{ forecast.precipitation_probability }}%</p>
+                                {% endif %}
+                            </div>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="card-text">No weather data available.</p>
+                <p class="card-text muted">No weather data available.</p>
             {% endif %}
         </div>
     </div>

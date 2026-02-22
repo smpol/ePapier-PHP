@@ -1,37 +1,53 @@
 <div class="col-md-4">
     <div class="card">
-        <div class="card-body text-center">
-            <h5 class="card-title">Current Time</h5>
-            <p style="font-size: 65px; margin: -20px;" class="card-text" id="current-time"></p>
-            <h5 class="card-title">Current Temperature</h5>
+        <div class="card-body">
+            {% set isLarge = (widgetSize|default('small')) == 'large' %}
+            <h5 class="card-title">Now</h5>
+            <div class="d-flex align-items-end justify-content-between" style="gap: 8px; margin: 2px 0 6px;">
+                <p class="card-text mono mb-0" id="current-time" style="font-size: {{ isLarge ? '54px' : '42px' }}; line-height: 0.95; font-weight: 800; margin: 0;"></p>
+                <p class="muted mono mb-0" id="current-date" style="font-size: {{ isLarge ? '14px' : '12px' }}; margin: 0 0 4px; text-transform: uppercase; white-space: nowrap;"></p>
+            </div>
+            <span class="badge-outline">Current Temperature</span>
             {% if weather %}
-                <div class="d-flex justify-content-center align-items-center">
-                    <h3 class="card-text mb-0">{{ weather.current_weather.temperature }}°C</h3>
-                    <i class="wi weather-icon {{ weather.current_weather.icon }} ms-2"></i>
+                <div class="d-flex align-items-center justify-content-center" style="gap: 8px; margin-top: 2px;">
+                    <h3 class="card-text mb-0" style="font-size: {{ isLarge ? '28px' : '22px' }}; font-weight: 800;">{{ weather.current_weather.temperature|round(1) }}&deg;C</h3>
+                    <i class="wi weather-icon {{ weather.current_weather.icon }}"></i>
                 </div>
+                {% if isLarge and weather.current_weather.wind_speed is defined %}
+                    <p class="muted" style="font-size: 11px;">Wind {{ weather.current_weather.wind_speed }} km/h</p>
+                {% endif %}
             {% else %}
-                <h1 class="card-text" id="current-time"></h1>
-                <p class="card-text">No weather data available.</p>
+                <p class="card-text muted">No weather data available.</p>
             {% endif %}
         </div>
     </div>
 </div>
 
 <script>
-    const timeZone = '{{ timeZone }}'; // Zmienna strefy czasowej przekazana przez Twig
+    const currentWeatherTimeZone = '{{ timeZone }}';
 
-    function updateTime() {
+    function updateCurrentWeatherTime() {
         const now = new Date();
         const options = {
-            timeZone: timeZone,
+            timeZone: currentWeatherTimeZone,
             hour: '2-digit',
             minute: '2-digit',
             hour12: false
         };
         const timeString = now.toLocaleTimeString('en-GB', options);
         document.getElementById('current-time').textContent = timeString;
+        const dateString = new Intl.DateTimeFormat('en-GB', {
+            timeZone: currentWeatherTimeZone,
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        }).format(now).replace(/\//g, '.');
+        const dateEl = document.getElementById('current-date');
+        if (dateEl) {
+            dateEl.textContent = dateString;
+        }
     }
 
-    setInterval(updateTime, 1000);
-    updateTime();
+    setInterval(updateCurrentWeatherTime, 1000);
+    updateCurrentWeatherTime();
 </script>

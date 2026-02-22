@@ -1,22 +1,21 @@
 <div class="col-md-4">
     <div class="card">
-        <div class="card-body text-center">
+        <div class="card-body">
+            {% set isLarge = (widgetSize|default('small')) == 'large' %}
             <h5 class="card-title">Upcoming Events</h5>
             <ul class="list-unstyled">
                 {% if events %}
-                    {% for event in events %}
+                    {% for event in events|slice(0, isLarge ? 4 : 2) %}
                         <li>
-                            <strong class="event-summary">{{ event.summary }}</strong><br/>
-                            <small>
-                                {{ event.start | date('d-m-Y H:i') }}
-                            </small>
+                            <strong class="event-summary" style="font-size: 12px;">{{ event.summary }}</strong><br/>
+                            <small class="mono muted">{{ event.start | date('d-m-Y H:i') }}</small>
                         </li>
-                        {% if not loop.last and loop.index0 < 2 %}
-                            <hr style="margin: 5px 0"/>
+                        {% if not loop.last %}
+                            <hr/>
                         {% endif %}
                     {% endfor %}
                 {% else %}
-                    <p>No upcoming events.</p>
+                    <p class="muted">No upcoming events.</p>
                 {% endif %}
             </ul>
         </div>

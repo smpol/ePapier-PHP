@@ -1,9 +1,10 @@
 <div class="col-md-4">
     <div class="card">
-        <div class="card-body text-center">
+        <div class="card-body">
             <h5 class="card-title">Air Quality</h5>
             {% if airQuality %}
-                <h4 class="card-text mb-0"><b>
+                <div class="badge-outline">EU AQI {{ airQuality.current.european_aqi }}</div>
+                <h4 class="card-text mb-0" style="font-size: 19px; font-weight: 800; line-height: 1.05;">
                 {% if airQuality.current.european_aqi >= 0 and airQuality.current.european_aqi <= 20 %}
                     Good
                 {% elseif airQuality.current.european_aqi >= 21 and airQuality.current.european_aqi <= 40 %}
@@ -17,14 +18,14 @@
                 {% else %}
                     Extremely Poor
                 {% endif %}
-                </b></h4>
-                <p class="card-text mb-0">PM 10 - {{ airQuality.current.pm10 }} {{ airQuality.current_units.pm10 }}</p>
-                <p class="card-text mb-0">PM 2.5
-                    - {{ airQuality.current.pm2_5 }} {{ airQuality.current_units.pm2_5 }}</p>
-                <p class="card-text mb-0">CO
-                    - {{ airQuality.current.carbon_monoxide }} {{ airQuality.current_units.carbon_monoxide }}</p>
+                </h4>
+                <div style="font-size: 11px; line-height: 1.2;">
+                    <div>PM10 <span class="mono">{{ airQuality.current.pm10 }}</span> {{ airQuality.current_units.pm10 }}</div>
+                    <div>PM2.5 <span class="mono">{{ airQuality.current.pm2_5 }}</span> {{ airQuality.current_units.pm2_5 }}</div>
+                    <div>CO <span class="mono">{{ airQuality.current.carbon_monoxide }}</span> {{ airQuality.current_units.carbon_monoxide }}</div>
+                </div>
             {% else %}
-                <p class="card-text">No Air Quality data available.</p>
+                <p class="card-text muted">No air quality data available.</p>
             {% endif %}
         </div>
     </div>

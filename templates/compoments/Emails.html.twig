@@ -1,28 +1,32 @@
 <div class="col-md-4">
     <div class="card">
-        <div class="card-body text-center">
+        <div class="card-body">
+            {% set isLarge = (widgetSize|default('small')) == 'large' %}
             <h5 class="card-title">Email Notifications</h5>
             {% if emailConfigured %}
                 {% if latestMail %}
                     {% if unreadCount > 0 %}
-                        <p class="event-summary" style="font-size: 15px;">You have <strong>{{ unreadCount }}</strong>
-                            unread messages.</p>
+                        <span class="badge-outline">{{ unreadCount }} unread</span>
                     {% else %}
-                        <p>You have no new emails.</p>
+                        <span class="badge-outline">Inbox clear</span>
                     {% endif %}
-                    <h6>Latest Email:</h6>
+                    <h6 class="mt-1 mb-0" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">Latest</h6>
                     <ul class="list-unstyled">
                         <li>
-                            <strong class="event-summary">{{ latestMail.subject }}</strong><br/>
-                            <small class="event-summary">From: {{ latestMail.from }}</small><br/>
-                            <small>Date: {{ latestMail.date }}</small>
+                            <strong class="event-summary" style="font-size: 12px;">{{ latestMail.subject }}</strong><br/>
+                            {% if isLarge %}
+                                <small class="event-summary muted">From: {{ latestMail.from }}</small><br/>
+                                <small class="mono muted">{{ latestMail.date }}</small>
+                            {% else %}
+                                <small class="event-summary muted">{{ latestMail.from }}</small>
+                            {% endif %}
                         </li>
                     </ul>
                 {% else %}
-                    <p>No emails in the inbox.</p>
+                    <p class="muted">No emails in the inbox.</p>
                 {% endif %}
             {% else %}
-                <p>No email settings configured.</p>
+                <p class="muted">No email settings configured.</p>
             {% endif %}
         </div>
     </div>
