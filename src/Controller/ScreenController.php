@@ -56,8 +56,12 @@ class ScreenController extends AbstractController
         $weatherData = $cache->get('weather_data', function (ItemInterface $item) use ($weatherService, $location, $cache) {
             if ($location) {
                 $item->expiresAfter(60);
+                $result = $weatherService->getWeatherData($location->getLat(), $location->getLon());
+                if (null === $result) {
+                    error_log('ScreenController weather_data null for location lat='.$location->getLat().' lon='.$location->getLon());
+                }
 
-                return $weatherService->getWeatherData($location->getLat(), $location->getLon());
+                return $result;
             } else {
                 if (isset($cache)) {
                     $cache->delete('weather_data');

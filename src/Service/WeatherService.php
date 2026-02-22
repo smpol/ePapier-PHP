@@ -72,18 +72,22 @@ class WeatherService
                 ]
             );
 
-            if (200 !== $response->getStatusCode()) {
+            $statusCode = $response->getStatusCode();
+            if (200 !== $statusCode) {
+                error_log('WeatherService::getWeatherData status='.$statusCode.' body='.$response->getContent(false));
                 return null;
             }
 
             $weatherData = $response->toArray();
             if (!isset($weatherData['current_weather']) || !is_array($weatherData['current_weather'])) {
+                error_log('WeatherService::getWeatherData missing current_weather. Keys='.implode(',', array_keys($weatherData)));
                 return null;
             }
 
             $current = &$weatherData['current_weather'];
             $weatherCode = $current['weathercode'] ?? $current['weather_code'] ?? null;
             if (null === $weatherCode) {
+                error_log('WeatherService::getWeatherData missing weather code in current_weather.');
                 return null;
             }
 
@@ -96,12 +100,16 @@ class WeatherService
 
             $current['icon'] = $this->getWeatherIcon($current['weathercode'], $current['is_day']);
             $weatherData['forecast_data'] = isset($weatherData['daily']) ? $this->processForecast($weatherData['daily']) : [];
+            if (empty($weatherData['forecast_data'])) {
+                error_log('WeatherService::getWeatherData forecast_data empty. daily_keys='.(isset($weatherData['daily']) && is_array($weatherData['daily']) ? implode(',', array_keys($weatherData['daily'])) : 'none'));
+            }
 
             return $weatherData;
         } catch (TransportExceptionInterface|
             ServerExceptionInterface|
             ClientExceptionInterface|
             RedirectionExceptionInterface $e) {
+            error_log('WeatherService::getWeatherData exception '.get_class($e).': '.$e->getMessage());
             return null;
         }
     }
