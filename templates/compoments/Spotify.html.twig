@@ -7,7 +7,7 @@
                 <p class="card-text muted" style="font-size: 15px; font-weight: 600;">Not connected.</p>
             {% elseif spotifyNowPlaying.status == 'not_playing' %}
                 <span class="badge-outline">Idle</span>
-                <p class="card-text" style="margin-top: 8px; font-size: 16px; font-weight: 600;">Nothing is currently playing.</p>
+                <p class="card-text" style="margin-top: 8px; {{ isLarge ? 'font-size: 40px;' : 'font-size: 16px;' }} font-weight: 600;">Nothing is currently playing.</p>
             {% else %}
                 {% if spotifyNowPlaying.error is defined %}
                     <p class="card-text" style="font-size: 15px; font-weight: 600;">{{ spotifyNowPlaying.error }}</p>
