@@ -4,7 +4,8 @@
             {% set isLarge = (widgetSize|default('small')) == 'large' %}
             <h5 class="card-title">Countdown</h5>
             {% if countdown %}
-                {% for event in countdown|slice(0, 2) %}
+                {% set howMany = isLarge ? 5 : 3 %}
+                {% for event in countdown|slice(0, howMany) %}
                     <div style="padding: 4px 0 3px; margin-bottom: {{ loop.last ? '0' : '4px' }}; {{ not loop.last ? 'border-bottom: 1px solid #000;' : '' }}">
                         <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
                             <div class="event-summary" style="font-weight: 700; font-size: 14px;">{{ event.description }}</div>
