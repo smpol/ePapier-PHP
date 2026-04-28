@@ -26,9 +26,13 @@ class UpdateScreenService
             // error_log('UpdateScreen URL: ' . $url); // Optional debug
             
             $response = $this->httpClient->request('GET', $url);
+            $response->getStatusCode(); // Trigger the request
         } catch (TransportExceptionInterface $e) {
-        } finally {
-
+            error_log('UpdateScreenService TransportException: ' . $e->getMessage());
+            // Silently ignore transport errors - server may be unavailable
+        } catch (\Exception $e) {
+            error_log('UpdateScreenService Exception: ' . $e->getMessage());
+            // Silently ignore any other errors
         }
     }
 }

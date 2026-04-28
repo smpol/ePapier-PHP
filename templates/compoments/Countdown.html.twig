@@ -4,50 +4,145 @@
             {% set isLarge = (widgetSize|default('small')) == 'large' %}
             <h5 class="card-title">Countdown</h5>
             {% if countdown %}
-                {% set howMany = isLarge ? 5 : 3 %}
-                {% for event in countdown|slice(0, howMany) %}
-                    <div style="padding: 4px 0 3px; margin-bottom: {{ loop.last ? '0' : '4px' }}; {{ not loop.last ? 'border-bottom: 1px solid #000;' : '' }}">
-                        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
-                            <div class="event-summary" style="font-weight: 700; font-size: 14px;">{{ event.description }}</div>
-                            <div class="card-text mb-0 event-summary mono" id="countdown-timer-{{ loop.index }}" style="font-size: 15px; font-weight: 700;"></div>
+                {% set howMany = isLarge ? 6 : 3 %}
+                {% if isLarge %}
+                    <div style="display: flex; gap: 8px;">
+                        <div style="flex: 1;">
+                        {% for event in countdown|slice(0, 3) %}
+                            <div style="padding: 4px 0 3px; {{ not loop.last ? 'border-bottom: 1px solid #000; margin-bottom: 4px;' : '' }}">
+                                <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                                    <div class="event-summary" style="font-weight: 700; font-size: 14px;">{{ event.description }}</div>
+                                    <div class="card-text mb-0 event-summary mono" id="countdown-timer-{{ loop.index }}" style="font-size: 15px; font-weight: 700;"></div>
+                                </div>
+                            </div>
+                            <script>
+                                const countdownDate{{ loop.index }} = new Date("{{ event.date|date('Y-m-d H:i:s') }}").getTime();
+                                const countdownTimer{{ loop.index }} = document.getElementById('countdown-timer-{{ loop.index }}');
+
+                                function updateCountdown{{ loop.index }}() {
+                                    const now = new Date().getTime();
+                                    const distance = countdownDate{{ loop.index }} - now;
+
+                                    if (distance < 0) {
+                                        countdownTimer{{ loop.index }}.innerHTML = 'Countdown ended';
+                                        clearInterval(interval{{ loop.index }});
+                                        return;
+                                    }
+
+                                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                                    if (days > 99) {
+                                        countdownTimer{{ loop.index }}.innerHTML = `${days} days`;
+                                    } else if (days > 0) {
+                                        countdownTimer{{ loop.index }}.innerHTML = `${days}d ${hours}h`;
+                                    } else if (hours > 0) {
+                                        countdownTimer{{ loop.index }}.innerHTML = `${hours}h ${minutes}m`;
+                                    } else if (minutes > 0) {
+                                        countdownTimer{{ loop.index }}.innerHTML = `${minutes}m ${seconds}s`;
+                                    } else {
+                                        countdownTimer{{ loop.index }}.innerHTML = `${seconds}s`;
+                                    }
+                                }
+
+                                const interval{{ loop.index }} = setInterval(updateCountdown{{ loop.index }}, 1000);
+                                updateCountdown{{ loop.index }}();
+                            </script>
+                        {% endfor %}
+                        </div>
+                        <div style="flex: 1;">
+                        {% for event in countdown|slice(3, 3) %}
+                            <div style="padding: 4px 0 3px; {{ not loop.last ? 'border-bottom: 1px solid #000; margin-bottom: 4px;' : '' }}">
+                                <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                                    <div class="event-summary" style="font-weight: 700; font-size: 14px;">{{ event.description }}</div>
+                                    <div class="card-text mb-0 event-summary mono" id="countdown-timer-{{ loop.index + 3 }}" style="font-size: 15px; font-weight: 700;"></div>
+                                </div>
+                            </div>
+                            <script>
+                                const countdownDate{{ loop.index + 3 }} = new Date("{{ event.date|date('Y-m-d H:i:s') }}").getTime();
+                                const countdownTimer{{ loop.index + 3 }} = document.getElementById('countdown-timer-{{ loop.index + 3 }}');
+
+                                function updateCountdown{{ loop.index + 3 }}() {
+                                    const now = new Date().getTime();
+                                    const distance = countdownDate{{ loop.index + 3 }} - now;
+
+                                    if (distance < 0) {
+                                        countdownTimer{{ loop.index + 3 }}.innerHTML = 'Countdown ended';
+                                        clearInterval(interval{{ loop.index + 3 }});
+                                        return;
+                                    }
+
+                                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                                    if (days > 99) {
+                                        countdownTimer{{ loop.index + 3 }}.innerHTML = `${days} days`;
+                                    } else if (days > 0) {
+                                        countdownTimer{{ loop.index + 3 }}.innerHTML = `${days}d ${hours}h`;
+                                    } else if (hours > 0) {
+                                        countdownTimer{{ loop.index + 3 }}.innerHTML = `${hours}h ${minutes}m`;
+                                    } else if (minutes > 0) {
+                                        countdownTimer{{ loop.index + 3 }}.innerHTML = `${minutes}m ${seconds}s`;
+                                    } else {
+                                        countdownTimer{{ loop.index + 3 }}.innerHTML = `${seconds}s`;
+                                    }
+                                }
+
+                                const interval{{ loop.index + 3 }} = setInterval(updateCountdown{{ loop.index + 3 }}, 1000);
+                                updateCountdown{{ loop.index + 3 }}();
+                            </script>
+                        {% endfor %}
                         </div>
                     </div>
-                    <script>
-                        const countdownDate{{ loop.index }} = new Date("{{ event.date|date('Y-m-d H:i:s') }}").getTime();
-                        const countdownTimer{{ loop.index }} = document.getElementById('countdown-timer-{{ loop.index }}');
+                {% else %}
+                    {% for event in countdown|slice(0, 3) %}
+                        <div style="padding: 4px 0 3px; {{ not loop.last ? 'border-bottom: 1px solid #000; margin-bottom: 4px;' : '' }}">
+                            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                                <div class="event-summary" style="font-weight: 700; font-size: 14px;">{{ event.description }}</div>
+                                <div class="card-text mb-0 event-summary mono" id="countdown-timer-{{ loop.index }}" style="font-size: 15px; font-weight: 700;"></div>
+                            </div>
+                        </div>
+                        <script>
+                            const countdownDate{{ loop.index }} = new Date("{{ event.date|date('Y-m-d H:i:s') }}").getTime();
+                            const countdownTimer{{ loop.index }} = document.getElementById('countdown-timer-{{ loop.index }}');
 
-                        function updateCountdown{{ loop.index }}() {
-                            const now = new Date().getTime();
-                            const distance = countdownDate{{ loop.index }} - now;
+                            function updateCountdown{{ loop.index }}() {
+                                const now = new Date().getTime();
+                                const distance = countdownDate{{ loop.index }} - now;
 
-                            if (distance < 0) {
-                                countdownTimer{{ loop.index }}.innerHTML = 'Countdown ended';
-                                clearInterval(interval{{ loop.index }});
-                                return;
+                                if (distance < 0) {
+                                    countdownTimer{{ loop.index }}.innerHTML = 'Countdown ended';
+                                    clearInterval(interval{{ loop.index }});
+                                    return;
+                                }
+
+                                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                                if (days > 99) {
+                                    countdownTimer{{ loop.index }}.innerHTML = `${days} days`;
+                                } else if (days > 0) {
+                                    countdownTimer{{ loop.index }}.innerHTML = `${days}d ${hours}h`;
+                                } else if (hours > 0) {
+                                    countdownTimer{{ loop.index }}.innerHTML = `${hours}h ${minutes}m`;
+                                } else if (minutes > 0) {
+                                    countdownTimer{{ loop.index }}.innerHTML = `${minutes}m ${seconds}s`;
+                                } else {
+                                    countdownTimer{{ loop.index }}.innerHTML = `${seconds}s`;
+                                }
                             }
 
-                            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                            if (days > 99) {
-                                countdownTimer{{ loop.index }}.innerHTML = `${days} days`;
-                            } else if (days > 0) {
-                                countdownTimer{{ loop.index }}.innerHTML = `${days}d ${hours}h`;
-                            } else if (hours > 0) {
-                                countdownTimer{{ loop.index }}.innerHTML = `${hours}h ${minutes}m`;
-                            } else if (minutes > 0) {
-                                countdownTimer{{ loop.index }}.innerHTML = `${minutes}m ${seconds}s`;
-                            } else {
-                                countdownTimer{{ loop.index }}.innerHTML = `${seconds}s`;
-                            }
-                        }
-
-                        const interval{{ loop.index }} = setInterval(updateCountdown{{ loop.index }}, 1000);
-                        updateCountdown{{ loop.index }}();
-                    </script>
-                {% endfor %}
+                            const interval{{ loop.index }} = setInterval(updateCountdown{{ loop.index }}, 1000);
+                            updateCountdown{{ loop.index }}();
+                        </script>
+                    {% endfor %}
+                {% endif %}
             {% else %}
                 <p class="card-text muted">No countdown set.</p>
             {% endif %}

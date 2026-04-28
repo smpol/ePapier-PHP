@@ -50,7 +50,9 @@ class ScreenController extends AbstractController
         $allCountdowns = $entityManager->getRepository(Countdown::class)->findBy([], ['date' => 'ASC']);
         $now = new \DateTime();
         $futureCountdowns = array_filter($allCountdowns, fn($c) => $c->getDate() > $now);
-        $countdown = array_slice($futureCountdowns, 0, 5);
+        // Reset keys after filtering to get the closest events
+        $futureCountdowns = array_values($futureCountdowns);
+        $countdown = array_slice($futureCountdowns, 0, 20);
         $location = $entityManager->getRepository(Location::class)->find(1);
 
         $weatherData = $cache->get('weather_data', function (ItemInterface $item) use ($weatherService, $location, $cache) {
