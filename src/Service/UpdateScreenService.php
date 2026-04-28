@@ -21,10 +21,10 @@ class UpdateScreenService
             $host = $_ENV['EPAPIER_HOST'] ?? 'lokalny.przysiezny.pl';
             // Sanitize host to prevent concatenated garbage
             $host = preg_replace('/[^a-zA-Z0-9\-\.]/', '', $host);
-            
+
             $url = 'http://' . $host . ':5002/updatescreen';
             // error_log('UpdateScreen URL: ' . $url); // Optional debug
-            
+
             $response = $this->httpClient->request('GET', $url);
             $response->getStatusCode(); // Trigger the request
         } catch (TransportExceptionInterface $e) {
